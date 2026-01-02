@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoomiePay - Dynamic</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style> [x-cloak] { display: none !important; } </style>
+</head>
+
+<body class="bg-slate-50 font-sans pb-24" 
+      x-data="{ 
+        openModal: false,
+        newTitle: '',
+        newAmount: '',
+        selectedUsers: [1, 2, 3],
+        expenses: [
+            { id: 1, title: 'Market (Bravo)', amount: 15.00, date: 'Bu gün, 14:20', paidBy: 'Sən', splits: [{name: 'Sən', amt: 5, paid: true}, {name: 'Elvin', amt: 5, paid: false}, {name: 'Orxan', amt: 5, paid: false}], type: 'orange' }
+        ],
+        addExpense() {
+            if(!this.newTitle || !this.newAmount) return;
+            
+            const perPerson = (this.newAmount / this.selectedUsers.length).toFixed(2);
+            const userNames = { 1: 'Sən', 2: 'Elvin', 3: 'Orxan' };
+            
+            const newEntry = {
+                id: Date.now(),
+                title: this.newTitle,
+                amount: parseFloat(this.newAmount).toFixed(2),
+                date: 'İndi',
+                paidBy: 'Sən',
+                type: 'indigo',
+                splits: this.selectedUsers.map(id => ({
+                    name: userNames[id],
+                    amt: perPerson,
+                    paid: id === 1 // Fərz edirik ki, sən ödəyirsən
+                }))
+            };
+            
+            this.expenses.unshift(newEntry);
+            this.openModal = false;
+            this.newTitle = '';
+            this.newAmount = '';
+            this.selectedUsers = [1, 2, 3];
+        }
+      }">
+
+    <nav class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-30">
+        <div class="max-w-md mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="bg-indigo-600 p-2 rounded-lg"><i class="fa-solid fa-wallet text-white text-xs"></i></div>
+                <h1 class="text-xl font-black text-slate-800">RoomiePay</h1>
+            </div>
+            <img src="https://ui-avatars.com/api/?name=User&background=6366f1&color=fff" class="w-8 h-8 rounded-full">
+        </div>
+    </nav>
+
+    <main class="max-w-md mx-auto px-6 mt-8">
+        <div class="bg-indigo-600 rounded-[2rem] p-6 text-white shadow-xl shadow-indigo-200 mb-8 relative overflow-hidden">
+            <div class="relative z-10">
+                <p class="text-indigo-100 text-sm font-medium opacity-80">Ümumi Balansın</p>
+                <h2 class="text-3xl font-bold mt-1">+7.10 AZN</h2>
+                <div class="flex gap-4 mt-6">
+                    <div class="bg-white/10 backdrop-blur-md rounded-2xl p-3 flex-1">
+                        <p class="text-[10px] uppercase font-bold text-indigo-200">Alacaq</p>
+                        <p class="text-lg font-bold">12.50 ₼</p>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-md rounded-2xl p-3 flex-1">
+                        <p class="text-[10px] uppercase font-bold text-indigo-200">Borc</p>
+                        <p class="text-lg font-bold">5.40 ₼</p>
+                    </div>
+                </div>
+            </div>
+            <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full"></div>
+        </div>
+
+        <h2 class="text-lg font-bold text-slate-800 mb-4">
+            <i class="fa-solid fa-clock-rotate-left text-indigo-500 text-sm"></i>
+            Son Əməliyyatlar
+        </h2>
+
+        <template x-for="expense in expenses" :key="expense.id">
+            <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 mb-4 transition-all animate-in slide-in-from-top duration-500">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="flex items-center gap-3">
+                        <div :class="`w-12 h-12 bg-${expense.type}-100 rounded-2xl flex items-center justify-center text-${expense.type}-600`">
+                            <i class="fa-solid fa-receipt"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-800" x-text="expense.title"></h3>
+                            <p class="text-xs text-slate-400 font-medium" x-text="expense.date"></p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-lg font-bold text-slate-800" x-text="expense.amount + ' AZN'"></span>
+                        <p class="text-[10px] text-indigo-500 font-bold uppercase" x-text="expense.paidBy + ' ödədin'"></p>
+                    </div>
+                </div>
+                
+                <div class="space-y-3 bg-slate-50 rounded-2xl p-3">
+                    <template x-for="split in expense.splits">
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-slate-600 flex items-center gap-2">
+                                <span :class="split.paid ? 'bg-green-500' : 'bg-slate-300'" class="w-2 h-2 rounded-full"></span>
+                                <span x-text="split.name"></span>
+                            </span>
+                            <span class="font-bold text-slate-700">
+                                <span x-text="split.amt + ' ₼'"></span>
+                                <i :class="split.paid ? 'fa-check-circle text-green-500' : 'fa-circle-xmark text-slate-300'" class="fa-solid ml-1"></i>
+                            </span>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </template>
+    </main>
+
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-8 py-4 flex justify-between items-center z-40">
+        <button class="text-indigo-600 text-xl"><i class="fa-solid fa-house"></i></button>
+        <button @click="openModal = true" class="bg-indigo-600 w-14 h-14 rounded-full flex items-center justify-center shadow-lg -mt-12 border-4 border-slate-50">
+            <i class="fa-solid fa-plus text-white text-xl"></i>
+        </button>
+        <button class="text-slate-400 text-xl"><i class="fa-solid fa-chart-pie"></i></button>
+    </div>
+
+    <div x-show="openModal" x-cloak class="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/60 backdrop-blur-sm">
+        <div @click.away="openModal = false" class="bg-white w-full max-w-md rounded-t-[2.5rem] p-8 shadow-2xl">
+            <h3 class="text-2xl font-black text-slate-800 mb-6">Xərc Əlavə Et</h3>
+            
+            <div class="space-y-5">
+                <div>
+                    <label class="text-xs font-bold text-slate-400 uppercase">Nə alınıb?</label>
+                    <input x-model="newTitle" type="text" class="w-full bg-slate-100 border-none rounded-2xl p-4 mt-1 outline-none">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-400 uppercase">Məbləğ</label>
+                    <input x-model="newAmount" type="number" class="w-full bg-slate-100 border-none rounded-2xl p-4 mt-1 outline-none font-bold">
+                </div>
+                
+                <div class="flex gap-3">
+                    <template x-for="u in [{id:1, n:'Sən'}, {id:2, n:'E'}, {id:3, n:'O'}]">
+                        <div @click="selectedUsers.includes(u.id) ? selectedUsers = selectedUsers.filter(x => x!==u.id) : selectedUsers.push(u.id)"
+                             :class="selectedUsers.includes(u.id) ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500'"
+                             class="w-14 h-14 rounded-2xl flex items-center justify-center font-bold cursor-pointer transition-all">
+                            <span x-text="u.n"></span>
+                        </div>
+                    </template>
+                </div>
+
+                <button @click="addExpense()" class="w-full bg-indigo-600 text-white py-5 rounded-2xl font-bold text-lg shadow-xl shadow-indigo-100">
+                    Qeyd Et
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
