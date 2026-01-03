@@ -8,6 +8,7 @@ class Expense(models.Model):
     title = models.CharField(max_length=255) 
     amount = models.DecimalField(max_digits=10, decimal_places=2) 
     paid_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='expenses_paid')
+    split_with = models.ManyToManyField(User, through='ExpenseSplit', related_name='expenses_shared')
     date = models.DateTimeField(auto_now_add=True)
     
     

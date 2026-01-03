@@ -36,7 +36,7 @@
         </div>
 
         <div x-show="tab === 'login'" x-transition>
-            <form method="post" class="space-y-5">
+            <form method="post" action="{% url 'login' %}" class="space-y-5">
                 {% csrf_token %}
                 <div>
                     <label class="text-xs font-bold text-slate-400 uppercase ml-1">İstifadəçi adı</label>
@@ -68,14 +68,23 @@
             </form>
         </div>
 
-        <div x-show="tab === 'register'" x-cloak x-transition>
-            <form action="#" class="space-y-5">
+        <div x-show="tab === 'register'" x-cloak x-transition
+            x-data="{ 
+                p1: '', 
+                p2: '',
+                {% comment %} get hasUpper() { return /[A-Z]/.test(this.p1) },
+                get hasNumber() { return /[0-9]/.test(this.p1) }, {% endcomment %}
+                get matches() { return this.p1 === this.p2 && this.p1 !== '' }
+            }">
+            <form method="post" action="{% url 'register' %}" class="space-y-5">
+                {% csrf_token %}
+                
                 <div>
-                    <label class="text-xs font-bold text-slate-400 uppercase ml-1">Tam Adın</label>
+                    <label class="text-xs font-bold text-slate-400 uppercase ml-1">Tam Ad</label>
                     <div class="relative mt-1">
                         <i class="fa-solid fa-signature absolute left-4 top-4 text-slate-300"></i>
-                        <input type="text" placeholder="Ad Soyad" 
-                               class="w-full bg-slate-50 border-none rounded-2xl p-4 pl-12 focus:ring-2 focus:ring-indigo-500 outline-none font-medium">
+                        <input type="text" placeholder="Ad Soyad" name="fullname"
+                            class="w-full bg-slate-50 border-none rounded-2xl p-4 pl-12 focus:ring-2 focus:ring-indigo-500 outline-none font-medium">
                     </div>
                 </div>
 
@@ -83,8 +92,8 @@
                     <label class="text-xs font-bold text-slate-400 uppercase ml-1">İstifadəçi adı</label>
                     <div class="relative mt-1">
                         <i class="fa-solid fa-at absolute left-4 top-4 text-slate-300"></i>
-                        <input type="text" placeholder="username" 
-                               class="w-full bg-slate-50 border-none rounded-2xl p-4 pl-12 focus:ring-2 focus:ring-indigo-500 outline-none font-medium">
+                        <input type="text" placeholder="username" name="username" 
+                            class="w-full bg-slate-50 border-none rounded-2xl p-4 pl-12 focus:ring-2 focus:ring-indigo-500 outline-none font-medium">
                     </div>
                 </div>
 
@@ -92,12 +101,36 @@
                     <label class="text-xs font-bold text-slate-400 uppercase ml-1">Şifrə</label>
                     <div class="relative mt-1">
                         <i class="fa-solid fa-shield-halved absolute left-4 top-4 text-slate-300"></i>
-                        <input type="password" placeholder="••••••••" 
-                               class="w-full bg-slate-50 border-none rounded-2xl p-4 pl-12 focus:ring-2 focus:ring-indigo-500 outline-none font-medium">
+                        <input type="password" placeholder="••••••••" name="password1" x-model="p1"
+                            class="w-full bg-slate-50 border-none rounded-2xl p-4 pl-12 focus:ring-2 focus:ring-indigo-500 outline-none font-medium">
+                    </div>
+                    {% comment %} <div class="flex gap-3 mt-2 px-2">
+                        <div class="flex items-center gap-1 text-[10px] font-bold uppercase" :class="hasUpper ? 'text-green-500' : 'text-slate-300'">
+                            <i class="fa-solid" :class="hasUpper ? 'fa-check' : 'fa-circle-dot'"></i> Böyük hərf
+                        </div>
+                        <div class="flex items-center gap-1 text-[10px] font-bold uppercase" :class="hasNumber ? 'text-green-500' : 'text-slate-300'">
+                            <i class="fa-solid" :class="hasNumber ? 'fa-check' : 'fa-circle-dot'"></i> Rəqəm
+                        </div>
+                    </div> {% endcomment %}
+                </div>
+
+                <div>
+                    <label class="text-xs font-bold text-slate-400 uppercase ml-1">Şifrəni təkrar edin</label>
+                    <div class="relative mt-1">
+                        <i class="fa-solid fa-shield-halved absolute left-4 top-4 text-slate-300"></i>
+                        <input type="password" placeholder="••••••••" name="password2" x-model="p2"
+                            class="w-full bg-slate-50 border-none rounded-2xl p-4 pl-12 focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
+                            :class="p2 !== '' && !matches ? 'ring-2 ring-red-400' : ''">
+                    </div>
+                    <div x-show="p2 !== '' && !matches" class="text-[10px] text-red-500 font-bold uppercase mt-1 ml-2">
+                        Şifrələr eyni deyil!
                     </div>
                 </div>
 
-                <button type="submit" class="w-full bg-slate-800 text-white py-5 rounded-2xl font-bold text-lg shadow-xl shadow-slate-100 active:scale-[0.98] transition-transform">
+                <button type="submit" 
+                        :disabled="!hasUpper || !hasNumber || !matches"
+                        :class="!hasUpper || !hasNumber || !matches ? 'opacity-50 cursor-not-allowed' : 'active:scale-[0.98]'"
+                        class="w-full bg-slate-800 text-white py-5 rounded-2xl font-bold text-lg shadow-xl shadow-slate-100 transition-all">
                     Hesab Yarat
                 </button>
             </form>
