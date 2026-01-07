@@ -11,7 +11,7 @@ class Expense(models.Model):
     split_with = models.ManyToManyField(User, through='ExpenseSplit', related_name='expenses_shared')
     date = models.DateTimeField(auto_now_add=True)
     
-    
+
     is_split_equally = models.BooleanField(default=True) 
 
     def __str__(self):
@@ -32,16 +32,20 @@ class Expense(models.Model):
             self.splits.all().delete()
             
             for user in users_list:
+                settled_status = (user == self.paid_by)
                 ExpenseSplit.objects.create(
                     expense=self,
                     user=user,
-                    amount_owed=split_amount
+                    amount_owed=split_amount,
+                    is_settled=settled_status
                 )
 
 class ExpenseSplit(models.Model):
     expense = models.ForeignKey(Expense, on_delete=models.CASCADE, related_name='splits')
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    amount_owed = models.DecimalField(max_digits=10, decimal_places=2) 
+    amount_owed = models.DecimalField(max_digits=10, decimal_places=2)
+    is_settled = models.BooleanField(default=False) 
+    waiting_for_settlement = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.user.username} - {self.amount_owed}"

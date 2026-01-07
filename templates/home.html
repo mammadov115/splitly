@@ -3,49 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RoomiePay - Dynamic</title>
+    <title>RoomiePay - jQuery Version</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style> [x-cloak] { display: none !important; } </style>
+    <style> 
+        [x-cloak] { display: none !important; } 
+        .hidden { display: none !important; }
+        .custom-scrollbar::-webkit-scrollbar { height: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+    </style>
 </head>
 
-<body class="bg-slate-50 font-sans pb-24" 
-      x-data="{ 
-        openModal: false,
-        newTitle: '',
-        newAmount: '',
-        selectedUsers: [1, 2, 3],
-        expenses: [
-            { id: 1, title: 'Market (Bravo)', amount: 15.00, date: 'Bu gün, 14:20', paidBy: 'Sən', splits: [{name: 'Sən', amt: 5, paid: true}, {name: 'Elvin', amt: 5, paid: false}, {name: 'Orxan', amt: 5, paid: false}], type: 'orange' }
-        ],
-        addExpense() {
-            if(!this.newTitle || !this.newAmount) return;
-            
-            const perPerson = (this.newAmount / this.selectedUsers.length).toFixed(2);
-            const userNames = { 1: 'Sən', 2: 'Elvin', 3: 'Orxan' };
-            
-            const newEntry = {
-                id: Date.now(),
-                title: this.newTitle,
-                amount: parseFloat(this.newAmount).toFixed(2),
-                date: 'İndi',
-                paidBy: 'Sən',
-                type: 'indigo',
-                splits: this.selectedUsers.map(id => ({
-                    name: userNames[id],
-                    amt: perPerson,
-                    paid: id === 1 // Fərz edirik ki, sən ödəyirsən
-                }))
-            };
-            
-            this.expenses.unshift(newEntry);
-            this.openModal = false;
-            this.newTitle = '';
-            this.newAmount = '';
-            this.selectedUsers = [1, 2, 3];
-        }
-      }">
+<body class="bg-slate-50 font-sans pb-24">
 
     <nav class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-30">
         <div class="max-w-md mx-auto px-6 py-4 flex justify-between items-center">
@@ -81,143 +50,76 @@
             Son Əməliyyatlar
         </h2>
 
-        <template x-for="expense in expenses" :key="expense.id">
-            <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 mb-4 transition-all animate-in slide-in-from-top duration-500">
+        <div id="expenses-list">
+            {% include "partials/card_paid_by_me.html" %}
+
+            {% include "partials/card_paid_by_others.html" %}
+
+            <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 mb-4">
                 <div class="flex justify-between items-start mb-4">
                     <div class="flex items-center gap-3">
-                        <div :class="`w-12 h-12 bg-${expense.type}-100 rounded-2xl flex items-center justify-center text-${expense.type}-600`">
+                        <div class="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center text-orange-600">
                             <i class="fa-solid fa-receipt"></i>
                         </div>
                         <div>
-                            <h3 class="font-bold text-slate-800" x-text="expense.title"></h3>
-                            <p class="text-xs text-slate-400 font-medium" x-text="expense.date"></p>
+                            <h3 class="font-bold text-slate-800">Market (Bravo)</h3>
+                            <p class="text-xs text-slate-400 font-medium">Bu gün, 14:20</p>
                         </div>
                     </div>
                     <div class="text-right">
-                        <span class="text-lg font-bold text-slate-800" x-text="expense.amount + ' AZN'"></span>
-                        <p class="text-[10px] text-indigo-500 font-bold uppercase" x-text="expense.paidBy + ' ödədin'"></p>
+                        <span class="text-lg font-bold text-slate-800">15.00 AZN</span>
+                        <p class="text-[10px] text-indigo-500 font-bold uppercase">Sən ödədin</p>
                     </div>
                 </div>
-                
-                <div class="space-y-3 bg-slate-50 rounded-2xl p-3">
-                    <template x-for="split in expense.splits">
-                        <div class="flex justify-between items-center text-sm">
-                            <span class="text-slate-600 flex items-center gap-2">
-                                <span :class="split.paid ? 'bg-green-500' : 'bg-slate-300'" class="w-2 h-2 rounded-full"></span>
-                                <span x-text="split.name"></span>
-                            </span>
-                            <span class="font-bold text-slate-700">
-                                <span x-text="split.amt + ' ₼'"></span>
-                                <i :class="split.paid ? 'fa-check-circle text-green-500' : 'fa-circle-xmark text-slate-300'" class="fa-solid ml-1"></i>
-                            </span>
-                        </div>
-                    </template>
-                </div>
             </div>
-        </template>
-
-        <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 mb-4 opacity-80" x-data="{ paid: false }">
-            <div class="flex justify-between items-start mb-4">
-                <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600">
-                        <i class="fa-solid fa-bolt"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-slate-800 leading-tight">İşıq Pulu</h3>
-                        <p class="text-xs text-slate-400 font-medium">Dünən, 10:00</p>
-                    </div>
-                </div>
-                <div class="text-right">
-                    <span class="text-lg font-bold text-slate-800">30.00 AZN</span>
-                    <p class="text-[10px] text-blue-500 font-bold uppercase">Elvin ödədi</p>
-                </div>
-            </div>
-            
-            <div class="text-xs text-slate-500 italic bg-blue-50 p-2 rounded-xl text-center mb-3">
-                Sənin payına 10.00 AZN düşür.
-            </div>
-
-            <button 
-                @click="paid = true"
-                :disabled="paid"
-                :class="paid ? 'bg-amber-100 text-amber-600 border-amber-200' : 'bg-indigo-600 text-white shadow-md shadow-indigo-100'"
-                class="w-full py-3 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 active:scale-[0.98]">
-                
-                <template x-if="!paid">
-                    <span><i class="fa-solid fa-wallet mr-1"></i> Ödə</span>
-                </template>
-
-                <template x-if="paid">
-                    <span class="flex items-center gap-2">
-                        <i class="fa-solid fa-hourglass-half animate-spin-slow"></i> 
-                        Gözlənilir...
-                    </span>
-                </template>
-            </button>
         </div>
-
     </main>
 
     <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-8 py-4 flex justify-between items-center z-40">
         <button class="text-indigo-600 text-xl"><i class="fa-solid fa-house"></i></button>
-        <button @click="openModal = true" class="bg-indigo-600 w-14 h-14 rounded-full flex items-center justify-center shadow-lg -mt-12 border-4 border-slate-50">
+        <button id="btn-open-modal" class="bg-indigo-600 w-14 h-14 rounded-full flex items-center justify-center shadow-lg -mt-12 border-4 border-slate-50">
             <i class="fa-solid fa-plus text-white text-xl"></i>
         </button>
         <button class="text-slate-400 text-xl"><i class="fa-solid fa-chart-pie"></i></button>
     </div>
 
-    <div x-show="openModal" x-cloak class="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/60 backdrop-blur-sm">
-        <div @click.away="openModal = false" class="bg-white w-full max-w-md rounded-t-[2.5rem] p-8 shadow-2xl">
+    <div id="modal-expense" class="fixed inset-0 z-50 hidden flex items-end justify-center bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-md rounded-t-[2.5rem] p-8 shadow-2xl">
             <h3 class="text-2xl font-black text-slate-800 mb-6">Xərc Əlavə Et</h3>
-            <form action="{% url "add_expense" %}" method="POST">
-                {% csrf_token %}
+            <form id="form-add-expense">
                 <div class="space-y-5">
                     <div>
                         <label class="text-xs font-bold text-slate-400 uppercase">Nə alınıb?</label>
-                        <input x-model="newTitle" name="title" type="text" placeholder="Məs: Yumurta, Yağ..." class="w-full bg-slate-100 border-none rounded-2xl p-4 mt-1 outline-none">
+                        <input id="newTitle" type="text" placeholder="Məs: Yumurta, Yağ..." required class="w-full bg-slate-100 border-none rounded-2xl p-4 mt-1 outline-none">
                     </div>
                     <div>
                         <label class="text-xs font-bold text-slate-400 uppercase">Məbləğ</label>
-                        <input x-model="newAmount" name="amount" type="number" placeholder="0.00" class="w-full bg-slate-100 border-none rounded-2xl p-4 mt-1 outline-none font-bold">
+                        <input id="newAmount" type="number" step="0.01" placeholder="0.00" required class="w-full bg-slate-100 border-none rounded-2xl p-4 mt-1 outline-none font-bold">
                     </div>
                     
-                    <div class="flex gap-4 overflow-x-auto pb-2 custom-scrollbar">
-                        <template x-for="u in [
-                            {id: {{ request.user.id }}, n: 'Sən', fullname: 'Sən'},
-                            {% for user in all_users %}
-                            {id: {{ user.id }}, n: '{{ user.first_name|make_list|first|upper }}', fullname: '{{ user.first_name }} {{ user.last_name|make_list|first|upper }}.'},
-                            {% endfor %}
-                            {% comment %} {id: 1, n: 'Sən', fullname: 'Sən'}, 
-                            {id: 2, n: 'E', fullname: 'Elvin'}, 
-                            {id: 3, n: 'O', fullname: 'Orxan'} {% endcomment %}
-                        ]" :key="u.id">
-                            <div class="flex flex-col items-center gap-2 shrink-0">
-                                
-                                <div @click="selectedUsers.includes(u.id) ? selectedUsers = selectedUsers.filter(x => x!==u.id) : selectedUsers.push(u.id)"
-                                    :class="selectedUsers.includes(u.id) ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100' : 'bg-slate-100 text-slate-500'"
-                                    class="w-14 h-14 rounded-2xl flex items-center justify-center font-bold cursor-pointer transition-all active:scale-90">
-                                    
-                                    <span x-text="u.n"></span>
-                                </div>
-
-                                <span
-                                    x-show="u.fullname !== 'Sən'"
-                                    x-text="u.fullname" 
-                                    class="text-[10px] font-bold uppercase tracking-wider transition-colors"
-                                    :class="selectedUsers.includes(u.id) ? 'text-indigo-600' : 'text-slate-400'">
-                                </span>
-
-                                <input type="checkbox" name="split_with" :value="u.id" x-model="selectedUsers" class="hidden">
+                    <div id="user-selector" class="flex gap-4 overflow-x-auto pb-2 custom-scrollbar">
+                        <div class="user-item flex flex-col items-center gap-2 shrink-0 cursor-pointer" data-id="{{ request.user.id }}" data-name="Sən">
+                            <div class="chip w-14 h-14 rounded-2xl flex items-center justify-center font-bold bg-indigo-600 text-white shadow-md">S</div>
+                            <span class="text-[10px] font-bold text-indigo-600 uppercase">Sən</span>
+                        </div>
+                        {% for user in all_users %}
+                            <div class="user-item flex flex-col items-center gap-2 shrink-0 cursor-pointer" data-id="{{ user.id }}" data-name="{{ user.first_name }}">
+                                <div class="chip w-14 h-14 rounded-2xl flex items-center justify-center font-bold bg-indigo-600 text-white shadow-md">{{ user.first_name|make_list|first|upper }}</div>
+                                <span class="text-[10px] font-bold text-indigo-600 uppercase">{{ user.first_name }} {{ user.last_name|make_list|first|upper }}.</span>
                             </div>
-                        </template>
+                        {% endfor %}
                     </div>
 
-                    <button @click="addExpense()" class="w-full bg-indigo-600 text-white py-5 rounded-2xl font-bold text-lg shadow-xl shadow-indigo-100">
+                    <button type="submit" class="w-full bg-indigo-600 text-white py-5 rounded-2xl font-bold text-lg shadow-xl shadow-indigo-100">
                         Qeyd Et
                     </button>
                 </div>
             </form>
         </div>
     </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    <script src="/static/js/script.js"></script>
 </body>
 </html>

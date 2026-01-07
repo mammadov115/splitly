@@ -13,6 +13,8 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 import json
 from decimal import Decimal
+from django.http import HttpResponse
+from django.db.models import F, FilteredRelation, Q
 
 class HomeView(LoginRequiredMixin, ListView):
     model = Expense
@@ -27,6 +29,27 @@ class HomeView(LoginRequiredMixin, ListView):
         # Adding splits to context for display purposes
         context['splits'] = ExpenseSplit.objects.select_related('expense', 'user').all()
         context['all_users'] = User.objects.exclude(id=self.request.user.id)
+
+        user = self.request.user
+        base_queryset = Expense.objects.prefetch_related('splits__user').select_related('paid_by').all().order_by('-date')
+        context['my_paid_expenses'] = base_queryset.filter(paid_by=user)
+
+        # Digərlərinin ödədiyi xərclər
+        others_paid = Expense.objects.filter(
+            split_with=user
+        ).exclude(
+            paid_by=user
+        ).prefetch_related(
+            'splits'
+        ).annotate(
+            # Cari userin bu xərcdəki split məlumatını tapırıq
+            user_share=F('splits__amount_owed'),
+            user_is_settled=F('splits__is_settled')
+        ).filter(
+            splits__user=user # Yalnız cari userin splitini annotasiya et
+        ).order_by('-date')
+        context['others_paid_expenses'] = others_paid
+
         return context
 
     def post(self, request, *args, **kwargs):
@@ -44,7 +67,6 @@ class HomeView(LoginRequiredMixin, ListView):
             return redirect('home')
         return self.get(request, *args, **kwargs)
     
-
 class UserLoginView(LoginView):
     template_name = 'login.html' # Login və Register üçün eyni faylı istifadə edəcəyik
     redirect_authenticated_user = True # Giriş edibsə birbaşa home-a atır
@@ -72,11 +94,9 @@ class UserRegisterView(CreateView):
 class UserLogoutView(LogoutView):
     next_page = reverse_lazy('login')
 
-
 @login_required
-@require_POST
 def add_expense_ajax(request):
-    print("AJAX vasitəsilə yeni xərc əlavə edilir")
+    print("AJAX request body:", request.body)
     try:
         data = json.loads(request.body)
         title = data.get('title')
@@ -100,17 +120,9 @@ def add_expense_ajax(request):
         users_to_split = User.objects.filter(id__in=user_ids)
         expense.split_expense(users_to_split)
 
-        # 3. Alpine.js-ə yeni datanı göndərmək
-        return JsonResponse({
-            'success': True,
-            'expense': {
-                'id': expense.id,
-                'title': expense.title,
-                'amount': float(expense.amount),
-                'date': expense.date.strftime('%d.%m.%Y'),
-                'paid_by': expense.paid_by.username
-            }
-        })
+        # 3. Yeni sttausu göndərmək
+        return HttpResponse(status=200)
 
     except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+        print("Error:", e)
+        return HttpResponse(status=400)

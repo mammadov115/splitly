@@ -1,0 +1,69 @@
+{% load humanize %}
+
+
+{% for expense in my_paid_expenses %}
+    <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 mb-4">
+        <div class="flex justify-between items-start mb-4">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center text-orange-600">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-slate-800 leading-tight">{{ expense.title }}</h3>
+                    <p class="text-xs text-slate-400 font-medium">
+                        {% if expense.date|naturalday == "today" %}
+                            Bu gün, {{ expense.date|date:"H:i" }}
+                        {% elif expense.date|naturalday == "yesterday" %}
+                            Dünən, {{ expense.date|date:"H:i" }}
+                        {% else %}
+                            {{ expense.date|date:"d E" }}, {{ expense.date|date:"H:i" }} 
+                            {# "d E" formatı "07 Yanvar" kimi çıxarır #}
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            <div class="text-right">
+                <span class="text-lg font-bold text-slate-800">{{ expense.amount }} AZN</span>
+                <p class="text-[10px] text-indigo-500 font-bold uppercase">Sən ödədin</p>
+            </div>
+        </div>
+        
+        <div class="space-y-3 bg-slate-50 rounded-2xl p-3">
+            {% for split in expense.splits.all %}
+                <div class="flex justify-between items-center text-sm">
+                    <span class="text-slate-600 flex items-center gap-2">
+                        {% if split.is_settled %}
+                            <span class="w-2 h-2 rounded-full bg-green-500"></span> 
+                        {% else %}
+                            <span class="w-2 h-2 rounded-full bg-slate-300"></span> 
+                        {% endif %}
+
+                        {% if forloop.first %}
+                        Sən
+                        {% else %}
+                        {{ split.user.first_name }} {{ split.user.last_name }}
+                        {% endif %}
+                    </span>
+                    <span class="font-bold text-slate-700"> {{ split.amount_owed }} ₼ 
+                    {% if split.is_settled %}
+                        <i class="fa-solid fa-check-circle ml-1 text-green-500"></i></span>
+                    {% else %}
+                        <i class="fa-solid fa-circle-xmark ml-1 text-slate-300"></i></span>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            {% comment %} <div class="flex justify-between items-center text-sm">
+                <span class="text-slate-600 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-slate-300"></span> Elvin
+                </span>
+                <span class="font-bold text-slate-700">5.00 ₼ <i class="fa-solid fa-circle-xmark ml-1 text-slate-300"></i></span>
+            </div>
+            <div class="flex justify-between items-center text-sm">
+                <span class="text-slate-600 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-slate-300"></span> Orxan
+                </span>
+                <span class="font-bold text-slate-700">5.00 ₼ <i class="fa-solid fa-circle-xmark ml-1 text-slate-300"></i></span>
+            </div> {% endcomment %}
+        </div>
+    </div>
+{% endfor %}
