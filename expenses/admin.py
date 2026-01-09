@@ -17,6 +17,6 @@ class ExpenseAdmin(admin.ModelAdmin):
 
 @admin.register(ExpenseSplit)
 class ExpenseSplitAdmin(admin.ModelAdmin):
-    list_display = ('expense', 'user', 'amount_owed')
+    list_display = ('expense', 'user', 'amount_owed','waiting_for_settlement', 'is_settled' )
     list_filter = ('user',)
     search_fields = ('expense__title', 'user__username')

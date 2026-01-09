@@ -39,6 +39,23 @@ class Expense(models.Model):
                     amount_owed=split_amount,
                     is_settled=settled_status
                 )
+        
+    @property
+    def other_splits(self):
+        # Bu funksiya xərci yaradan (ödəyən) adamın payını avtomatik çıxarır
+        return self.splits.exclude(user=self.paid_by)
+    
+    @property
+    def my_split(self):
+        return self.splits.filter(user=self.paid_by).first()
+
+    def get_type(self, user):
+        if self.paid_by == user:
+            return "paid_by_me"
+        elif self.splits.filter(user=user).exists():
+            return "shared_with_me"
+        else:
+            return "other"
 
 class ExpenseSplit(models.Model):
     expense = models.ForeignKey(Expense, on_delete=models.CASCADE, related_name='splits')

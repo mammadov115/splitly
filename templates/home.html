@@ -22,7 +22,29 @@
                 <div class="bg-indigo-600 p-2 rounded-lg"><i class="fa-solid fa-wallet text-white text-xs"></i></div>
                 <h1 class="text-xl font-black text-slate-800">RoomiePay</h1>
             </div>
-            <img src="https://ui-avatars.com/api/?name=User&background=6366f1&color=fff" class="w-8 h-8 rounded-full">
+            
+            <div class="relative" id="profile-dropdown-container">
+                <button id="profile-btn" class="focus:outline-none transition-transform active:scale-95">
+                    <img src="https://ui-avatars.com/api/?name={{ request.user.username }}&background=6366f1&color=fff" class="w-8 h-8 rounded-full border-2 border-transparent hover:border-indigo-500 transition-all">
+                </button>
+
+                <div id="dropdown-menu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 transform origin-top-right transition-all">
+                    <div class="px-4 py-2 border-bottom border-slate-50 mb-1">
+                        <p class="text-xs text-slate-400 font-medium">Xoş gəldin,</p>
+                        <p class="text-sm font-bold text-slate-800">{{ request.user.username }}</p>
+                    </div>
+                    
+                    <hr class="border-slate-50 my-1">
+                    
+                    <form action="{% url 'logout' %}" method="post" class="m-0">
+                        {% csrf_token %}
+                        <button type="submit" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-500 hover:bg-red-50 transition-colors font-bold">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                            Çıxış et
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
     </nav>
 
@@ -51,11 +73,11 @@
         </h2>
 
         <div id="expenses-list">
-            {% include "partials/card_paid_by_me.html" %}
+            {% for e in expenses %}
+                {% include e.card_template with expense=e %}
+            {% endfor %}
 
-            {% include "partials/card_paid_by_others.html" %}
-
-            <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 mb-4">
+            <!-- <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 mb-4">
                 <div class="flex justify-between items-start mb-4">
                     <div class="flex items-center gap-3">
                         <div class="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center text-orange-600">
@@ -71,7 +93,7 @@
                         <p class="text-[10px] text-indigo-500 font-bold uppercase">Sən ödədin</p>
                     </div>
                 </div>
-            </div>
+            </div> -->
         </div>
     </main>
 
@@ -118,8 +140,25 @@
         </div>
     </div>
 
+    <script>
+        // Static JS faylının istifadə edəcəyi dinamik data
+        window.RoomieData = {
+            currentUserId: {{ request.user.id }},
+            userNames: {
+                "{{ request.user.id }}": "Sən",
+                {% for u in all_users %}
+                    "{{ u.id }}": "{{ u.first_name|default:u.username }}"{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            }
+        };
+    </script>
+    
+    
+
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     
     <script src="/static/js/script.js"></script>
+    <script src="/static/js/waiting-button.js"></script>
+    <script src="/static/js/profile-dropdown.js"></script>
 </body>
 </html>

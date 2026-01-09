@@ -1,20 +1,21 @@
-from django.views.generic import ListView
+from django.views.generic import ListView, CreateView
 from django.shortcuts import redirect
 from .models import Expense, ExpenseSplit
 from .forms import ExpenseForm, ExtendedUserCreationForm
 from django.contrib.auth import login
 from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import reverse_lazy
-from django.views.generic import CreateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_POST
+from django.db.models import OuterRef, Subquery
 import json
 from decimal import Decimal
-from django.http import HttpResponse
-from django.db.models import F, FilteredRelation, Q
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import get_object_or_404
+
 
 class HomeView(LoginRequiredMixin, ListView):
     model = Expense
@@ -28,29 +29,34 @@ class HomeView(LoginRequiredMixin, ListView):
         context['form'] = ExpenseForm()
         # Adding splits to context for display purposes
         context['splits'] = ExpenseSplit.objects.select_related('expense', 'user').all()
-        context['all_users'] = User.objects.exclude(id=self.request.user.id)
-
+        context['all_users'] = User.objects.exclude(id=self.request.user.id).exclude(is_superuser=True)
+        
         user = self.request.user
-        base_queryset = Expense.objects.prefetch_related('splits__user').select_related('paid_by').all().order_by('-date')
-        context['my_paid_expenses'] = base_queryset.filter(paid_by=user)
+        # 1. Cari user-in həmin xərcdəki split-ini tapmaq üçün alt-sorğu (Subquery)
+        user_shares = ExpenseSplit.objects.filter(
+            expense=OuterRef('pk'), 
+            user=user
+        )
 
-        # Digərlərinin ödədiyi xərclər
-        others_paid = Expense.objects.filter(
-            split_with=user
-        ).exclude(
-            paid_by=user
-        ).prefetch_related(
-            'splits'
-        ).annotate(
-            # Cari userin bu xərcdəki split məlumatını tapırıq
-            user_share=F('splits__amount_owed'),
-            user_is_settled=F('splits__is_settled')
-        ).filter(
-            splits__user=user # Yalnız cari userin splitini annotasiya et
+        # 2. Xərcləri gətirərkən məlumatları üzərinə yazırıq
+        expenses = Expense.objects.select_related('paid_by').prefetch_related('splits__user').annotate(
+            my_split_id=Subquery(user_shares.values('pk')[:1]),
+            my_share=Subquery(user_shares.values('amount_owed')[:1]),
+            is_settled=Subquery(user_shares.values('is_settled')[:1]),
+            waiting_for_settlement=Subquery(user_shares.values('waiting_for_settlement')[:1])
         ).order_by('-date')
-        context['others_paid_expenses'] = others_paid
-
+        # expenses = Expense.objects.prefetch_related('splits__user').select_related('paid_by').all().order_by('-date')
+        
+        
+        for e in expenses:
+            if e.paid_by == user:
+                e.card_template = "partials/card_paid_by_me.html"
+            else:
+                e.card_template = "partials/card_paid_by_others.html"
+        context['expenses'] = expenses
+        
         return context
+        
 
     def post(self, request, *args, **kwargs):
         form = ExpenseForm(request.POST)
@@ -126,3 +132,15 @@ def add_expense_ajax(request):
     except Exception as e:
         print("Error:", e)
         return HttpResponse(status=400)
+
+
+@require_POST
+@csrf_exempt
+def settle_request_view(request, split_id):
+    # Yalnız həmin splitin sahibi bu istəyi göndərə bilər
+    split = get_object_or_404(ExpenseSplit, id=split_id, user=request.user)
+    
+    split.waiting_for_settlement = True
+    split.save()
+    
+    return JsonResponse({'status': 'success', 'message': 'Təsdiq gözlənilir'})
