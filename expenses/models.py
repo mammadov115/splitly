@@ -63,6 +63,9 @@ class ExpenseSplit(models.Model):
     amount_owed = models.DecimalField(max_digits=10, decimal_places=2)
     is_settled = models.BooleanField(default=False) 
     waiting_for_settlement = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+    is_viewed_by_creator = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.user.username} - {self.amount_owed}"

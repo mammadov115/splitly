@@ -64,15 +64,24 @@ $(document).ready(function() {
                 // Dinamik hesablama
                 const amountNum = parseFloat(amountVal);
                 const perPerson = (amountNum / selectedUsers.length).toFixed(2);
+                // 1. Siyahını sıralayırıq: Cari istifadəçi (Sən) həmişə ən başda olsun
+                let sortedForDisplay = [...selectedUsers].sort((a, b) => {
+                    if (a === currentUserId) return -1;
+                    if (b === currentUserId) return 1;
+                    return 0;
+                });
+                
                 let splitsHtml = '';
                 
-                selectedUsers.forEach(id => {
+                // 2. Sıralanmış siyahı üzrə dövr edirik
+                sortedForDisplay.forEach(id => {
                     const isMe = (id === currentUserId);
+                    // "Sən" yazısını və yaşıl nöqtəni tətbiq edirik
                     splitsHtml += `
                         <div class="flex justify-between items-center text-sm">
                             <span class="text-slate-600 flex items-center gap-2">
-                                <span class="${isMe ? 'bg-green-500' : 'bg-slate-300'} w-2 h-2 rounded-full"></span>
-                                <span>${userNames[id] || 'İstifadəçi'}</span>
+                                <span class="${isMe ? 'bg-green-500 shadow-[0_0_5px_rgba(34,197,94,0.5)]' : 'bg-slate-300'} w-2 h-2 rounded-full"></span>
+                                <span class="${isMe ? 'font-bold text-indigo-600' : ''}">${isMe ? 'Sən' : (userNames[id] || 'İstifadəçi')}</span>
                             </span>
                             <span class="font-bold text-slate-700">
                                 <span>${perPerson} ₼</span>

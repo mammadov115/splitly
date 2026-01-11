@@ -1,0 +1,54 @@
+<nav class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-30">
+    <div class="max-w-md mx-auto px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <div class="bg-indigo-600 p-2 rounded-lg"><i class="fa-solid fa-wallet text-white text-xs"></i></div>
+            <h1 class="text-xl font-black text-slate-800">RoomiePay</h1>
+        </div>
+        
+        <div class="relative" id="profile-dropdown-container">
+            <button id="profile-btn" class="focus:outline-none transition-transform active:scale-95">
+                <img src="https://ui-avatars.com/api/?name={{ request.user.username }}&background=6366f1&color=fff" class="w-8 h-8 rounded-full border-2 border-transparent hover:border-indigo-500 transition-all">
+            </button>
+
+            <div id="dropdown-menu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 transform origin-top-right transition-all">
+                <div class="px-4 py-2 border-bottom border-slate-50 mb-1">
+                    <p class="text-xs text-slate-400 font-medium">Xoş gəldin,</p>
+                    <p class="text-sm font-bold text-slate-800">{{ request.user.username }}</p>
+                </div>
+                
+                <hr class="border-slate-50 my-1">
+                <a href="{% url 'balance' %}" class="flex items-center justify-between px-4 py-3 hover:bg-slate-50 transition-colors group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                            <i class="fa-solid fa-wallet text-sm"></i>
+                        </div>
+                        <span class="text-sm font-bold text-slate-700">Balansım</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-[10px] text-slate-300"></i>
+                </a>
+
+                <a href="{% url 'notifications' %}" class="flex items-center justify-between px-4 py-3 hover:bg-slate-50 transition-colors group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center group-hover:bg-amber-600 group-hover:text-white transition-all">
+                            <i class="fa-solid fa-bell text-sm"></i>
+                        </div>
+                        <span class="text-sm font-bold text-slate-700">Bildirişlər</span>
+                    </div>
+                    {% if has_new_notifications %}
+                        <span class="w-2 h-2 bg-red-500 rounded-full animate-ping"></span>
+                    {% else %}
+                        <i class="fa-solid fa-chevron-right text-[10px] text-slate-300"></i>
+                    {% endif %}
+                </a>
+                
+                <form action="{% url 'logout' %}" method="post" class="m-0">
+                    {% csrf_token %}
+                    <button type="submit" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-500 hover:bg-red-50 transition-colors font-bold">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        Çıxış et
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</nav>
