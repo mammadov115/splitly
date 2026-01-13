@@ -171,7 +171,7 @@ def add_expense_ajax(request):
         # --- BİLDİRİŞ GÖNDƏRMƏ HİSSƏSİ ---
         notification_title = "Yeni Xərc!"
         notification_body = f"{request.user.username} '{title}' aldı. Sənə bu xərcdən {expense.my_split} düşür."
-        print(f"Preparing to send notifications for expense '{title}' to users: {[user.username for user in users_to_split]}")
+        print(f"Preparing to send notifications for expense '{title}' to users: {[user.username for user in users_to_split]}", flush=True)
         for user_to_notify in users_to_split:
             # Özümüzə bildiriş göndərmirik
             if user_to_notify != request.user:
