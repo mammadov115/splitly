@@ -41,7 +41,7 @@ firebase_creds = {
 try:
         # Birbaşa fayl yolunu veririk, bu 100% işləyəcək
         cred = credentials.Certificate(cert_path)
-        initialize_app(cred)
+        firebase_admin.initialize_app(cred)
         print("Firebase successfully initialized!")
 except Exception as e:
     print(f"Firebase initialization error: {e}")
