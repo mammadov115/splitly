@@ -17,6 +17,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
 from django.views.generic import TemplateView
 from expenses.utils import send_live_notification
+from fcm_django.models import FCMDevice
+
 
 
 class HomeView(LoginRequiredMixin, ListView):
@@ -292,3 +294,26 @@ class BalanceView(LoginRequiredMixin, TemplateView):
     #     return context
     
 
+@csrf_exempt
+def register_device(request):
+    if request.method == "POST" and request.user.is_authenticated:
+        try:
+            data = json.loads(request.body)
+            token = data.get('token')
+            device_type = data.get('type', 'web')
+
+            # Əgər bu token artıq varsa yeniləyirik, yoxdursa yaradırıq
+            device, created = FCMDevice.objects.get_or_create(
+                registration_id=token,
+                defaults={'user': request.user, 'type': device_type}
+            )
+            
+            if not created:
+                device.user = request.user
+                device.save()
+                
+            return JsonResponse({"status": "success", "message": "Cihaz qeydə alındı."})
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
+    
+    return JsonResponse({"status": "error", "message": "İcazə yoxdur"}, status=403)
