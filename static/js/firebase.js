@@ -105,3 +105,18 @@ if ('serviceWorker' in navigator) {
     });
 }
 
+navigator.serviceWorker.register('/firebase-messaging-sw.js')
+  .then((registration) => {
+      // Əgər yeni bir versiya varsa, gözləmədən aktiv etsin
+      registration.onupdatefound = () => {
+          const installingWorker = registration.installing;
+          installingWorker.onstatechange = () => {
+              if (installingWorker.state === 'installed') {
+                  if (navigator.serviceWorker.controller) {
+                      console.log('Yeni versiya tapıldı, yenilənir...');
+                      window.location.reload(); // Səhifəni yeniləyib yeni SW-ni dövriyyəyə salır
+                  }
+              }
+          };
+      };
+  });
