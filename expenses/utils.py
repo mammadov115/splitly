@@ -10,12 +10,12 @@ def log(message):
         timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         f.write(f"[{timestamp}] {message}\n")
 
-        
+
 
 def send_live_notification(user, title, body):
-    print(f"Sending live notification to {user.username}: {title} - {body}")
+    log(f"Sending live notification to {user.username}: {title} - {body}")
     devices = FCMDevice.objects.filter(user=user, active=True)
-    print(f"Found {devices.count()} active devices for user {user.username}")
+    log(f"Found {devices.count()} active devices for user {user.username}")
     
     if devices.exists():
         # Webpush üçün xüsusi nizamlamalar
