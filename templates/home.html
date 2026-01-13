@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RoomiePay - jQuery Version</title>
+    <title>Ana Səhifə</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style> 
@@ -22,15 +22,15 @@
         <div class="bg-indigo-600 rounded-[2rem] p-6 text-white shadow-xl shadow-indigo-200 mb-8 relative overflow-hidden">
             <div class="relative z-10">
                 <p class="text-indigo-100 text-sm font-medium opacity-80">Ümumi Balansın</p>
-                <h2 class="text-3xl font-bold mt-1">+7.10 AZN</h2>
+                <h2 class="text-3xl font-bold mt-1">{{ net_balance|floatformat:2 }} AZN</h2>
                 <div class="flex gap-4 mt-6">
                     <div class="bg-white/10 backdrop-blur-md rounded-2xl p-3 flex-1">
                         <p class="text-[10px] uppercase font-bold text-indigo-200">Alacaq</p>
-                        <p class="text-lg font-bold">12.50 ₼</p>
+                        <p class="text-lg font-bold">{{ total_receivable|floatformat:2 }} ₼</p>
                     </div>
                     <div class="bg-white/10 backdrop-blur-md rounded-2xl p-3 flex-1">
                         <p class="text-[10px] uppercase font-bold text-indigo-200">Borc</p>
-                        <p class="text-lg font-bold">5.40 ₼</p>
+                        <p class="text-lg font-bold">{{ total_debt|floatformat:2 }} ₼</p>
                     </div>
                 </div>
             </div>

@@ -13,10 +13,16 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os   
 from dotenv import load_dotenv
+import firebase_admin
+from firebase_admin import credentials
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 load_dotenv(BASE_DIR / '.env')
+
+# Initialize Firebase Admin SDK
+cred = credentials.Certificate("expenses-key.json")
+firebase_admin.initialize_app(cred)
 
 
 # Quick-start development settings - unsuitable for production
@@ -49,6 +55,7 @@ APPS = [
 ]
 
 THIRD_PARTY_APPS = [
+    'fcm_django',
 ]
 
 INSTALLED_APPS += APPS + THIRD_PARTY_APPS
@@ -77,6 +84,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'expenses.context_processors.balance_processor'
             ],
         },
     },

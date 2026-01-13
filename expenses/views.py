@@ -16,6 +16,7 @@ from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
 from django.views.generic import TemplateView
+from expenses.utils import send_live_notification
 
 
 class HomeView(LoginRequiredMixin, ListView):
@@ -163,7 +164,27 @@ def add_expense_ajax(request):
         
         users_to_split = User.objects.filter(id__in=user_ids)
         expense.split_expense(users_to_split)
+        
 
+        # --- BİLDİRİŞ GÖNDƏRMƏ HİSSƏSİ ---
+        notification_title = "Yeni Xərc!"
+        notification_body = f"{request.user.username} '{title}' aldı. Sənə bu xərcdən {expense.my_split} düşür."
+
+        for user_to_notify in users_to_split:
+            # Özümüzə bildiriş göndərmirik
+            if user_to_notify != request.user:
+                # 1. Firebase Live Push Notification
+                try:
+                    send_live_notification(
+                        user=user_to_notify,
+                        title=notification_title,
+                        body=notification_body
+                    )
+                except Exception as fcm_error:
+                    print(f"FCM Error for {user_to_notify.username}: {fcm_error}")
+
+
+        
         # 3. Yeni sttausu göndərmək
         return HttpResponse(status=200)
 
@@ -238,36 +259,36 @@ def approve_split(request, split_id):
 class BalanceView(LoginRequiredMixin, TemplateView):
     template_name = 'balance.html'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        user = self.request.user
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
+    #     user = self.request.user
 
-        # 1. Alacaqlar: Mənim yaratdığım xərclər üzrə hələ ödənilməmiş (is_settled=False) olanlar
-        receivables = ExpenseSplit.objects.filter(
-            expense__paid_by=user,
-            is_settled=False
-        ).values('user__first_name', 'user__last_name', 'user__username', 'user__id').annotate(
-            total_amount=Sum('amount_owed')
-        )
+    #     # 1. Alacaqlar: Mənim yaratdığım xərclər üzrə hələ ödənilməmiş (is_settled=False) olanlar
+    #     receivables = ExpenseSplit.objects.filter(
+    #         expense__paid_by=user,
+    #         is_settled=False
+    #     ).values('user__first_name', 'user__last_name', 'user__username', 'user__id').annotate(
+    #         total_amount=Sum('amount_owed')
+    #     )
 
-        # 2. Borclarım: Başqalarının yaratdığı xərclərdə mənim payıma düşən ödənilməmiş hissələr
-        debts = ExpenseSplit.objects.filter(
-            user=user,
-            is_settled=False
-        ).exclude(expense__paid_by=user).values(
-            'expense__paid_by__first_name', 
-            'expense__paid_by__last_name', 
-            'expense__paid_by__username',
-            'expense__paid_by__id'
-        ).annotate(
-            total_amount=Sum('amount_owed')
-        )
+    #     # 2. Borclarım: Başqalarının yaratdığı xərclərdə mənim payıma düşən ödənilməmiş hissələr
+    #     debts = ExpenseSplit.objects.filter(
+    #         user=user,
+    #         is_settled=False
+    #     ).exclude(expense__paid_by=user).values(
+    #         'expense__paid_by__first_name', 
+    #         'expense__paid_by__last_name', 
+    #         'expense__paid_by__username',
+    #         'expense__paid_by__id'
+    #     ).annotate(
+    #         total_amount=Sum('amount_owed')
+    #     )
 
-        context['receivables'] = receivables
-        context['debts'] = debts
-        context['total_receivable'] = receivables.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
-        context['total_debt'] = debts.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
+    #     context['receivables'] = receivables
+    #     context['debts'] = debts
+    #     context['total_receivable'] = receivables.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
+    #     context['total_debt'] = debts.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
         
-        return context
+    #     return context
     
 
