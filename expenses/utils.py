@@ -1,5 +1,5 @@
 from fcm_django.models import FCMDevice
-from firebase_admin.messaging import Message, Notification as FirebaseNotification
+from firebase_admin.messaging import Message, Notification
 
 def send_live_notification(user, title, body):
     # İstifadəçinin bütün aktiv cihazlarını tapırıq
@@ -9,14 +9,14 @@ def send_live_notification(user, title, body):
     if devices.exists():
         devices.send_message(
             Message(
-                notification=FirebaseNotification(
+                notification=Notification(
                     title=title,
                     body=body
                 ),
                 # Əlavə məlumat göndərmək üçün (məs: klikləyəndə xərcə getsin)
-                data={
-                    "click_action": "FLUTTER_NOTIFICATION_CLICK",
-                    "type": "new_expense",
-                }
+                # data={
+                #     "click_action": "FLUTTER_NOTIFICATION_CLICK",
+                #     "type": "new_expense",
+                # }
             )
         )
