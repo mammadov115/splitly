@@ -1,4 +1,4 @@
-from firebase_admin.messaging import Message, Notification, WebpushConfig, WebpushNotificationAction
+from firebase_admin.messaging import Message, Notification, WebpushConfig, WebpushNotification
 import datetime
 import os
 from fcm_django.models import FCMDevice
@@ -13,38 +13,29 @@ def log(message):
 
 
 
+
 def send_live_notification(user, title, body):
-    log(f"Sending live notification to {user.username}: {title} - {body}")
     devices = FCMDevice.objects.filter(user=user, active=True)
-    log(f"Found {devices.count()} active devices for user {user.username}")
     
     if devices.exists():
-        # Webpush üçün xüsusi nizamlamalar
-        log(f"Setting up WebpushConfig for user {user.username}")
-        webpush = WebpushConfig(
-            notification={
-                "title": title,
-                "body": body,
-                "icon": "/static/images/logo.png", # Bura öz loqonun yolunu yaz
-                "vibrate": [200, 100, 200],
-                "requireInteraction": True, # İstifadəçi bağlamayana qədər ekranda qalsın
-            }
-        )
-        log(f"WebpushConfig set up: {webpush}")
         try:
-            response = devices.send_message(
+            # Bildirişi WebpushNotification klası ilə yaradırıq
+            web_notification = WebpushNotification(
+                title=title,
+                body=body,
+                icon="/static/images/logo.png" # Opsionaldır
+            )
+
+            webpush = WebpushConfig(
+                notification=web_notification
+            )
+
+            devices.send_message(
                 Message(
-                    notification=Notification(
-                        title=title,
-                        body=body
-                    ),
-                    webpush=webpush # Web nizamlamasını əlavə etdik
+                    notification=Notification(title=title, body=body),
+                    webpush=webpush
                 )
             )
-            log(f"Firebase Response: {response}")
+            manual_log(f"Firebase UGURLU: Mesaj {user.username} ucun gonderildi.")
         except Exception as e:
-            log(f"Firebase Göndərmə Xətası: {str(e)}")
-    else:
-        log(f"No active devices found for user {user.username}")
-
-
+            manual_log(f"Firebase Göndərmə Xətası: {str(e)}")
