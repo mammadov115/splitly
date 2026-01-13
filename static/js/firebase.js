@@ -1,4 +1,4 @@
-// Firebase-i tətbiq daxilində başladırıq (sw faylındakı ilə eyni konfiqurasiya)
+// 1. Konfiqurasiya
 const firebaseConfig = {
     apiKey: "AIzaSyBlKHXjRdd47mUFx7E0Vd_jlvzbHFobHYc",
     projectId: "expenses-74419",
@@ -8,40 +8,65 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
-
-// VAPID Key-i Firebase Console-dan bura yapışdır
 const VAPID_KEY = "BMte8ksgtT1hD0rwFrz3Z6GNsdgpAbwUZqMazMhd-LSKoQwcVSJhm3oz4cLTohbcyCKqzCg2h1P8QczshD7D7Ik";
 
-// 1. İcazə istəyirik
-Notification.requestPermission().then((permission) => {
-    if (permission === 'granted') {
-        // 2. Tokeni alırıq
-        messaging.getToken({ vapidKey: VAPID_KEY }).then((currentToken) => {
-            if (currentToken) {
-                // 3. Tokeni Django bazasına göndəririk
-                sendTokenToServer(currentToken);
-            }
-        });
-    }
-});
-
-let isTokenSent = false;
+// 2. Tokeni Serverə Göndərmə Funksiyası
 function sendTokenToServer(token) {
-    if (isTokenSent) return;
     fetch('/register-device/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken') // Django CSRF təhlükəsizliyi
+            'X-CSRFToken': getCookie('csrftoken')
         },
         body: JSON.stringify({ token: token, type: 'web' })
     })
     .then(response => response.json())
-    .then(data => console.log("Cihaz qeydiyyatı:", data));
-    isTokenSent = true;
+    .then(data => console.log("Cihaz statusu yeniləndi:", data))
+    .catch(err => console.error("Serverlə əlaqə xətası:", err));
 }
 
-// CSRF Tokeni götürmək üçün köməkçi funksiya
+// 3. Əsas Aktivləşdirmə Məntiqi
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/firebase-messaging-sw.js')
+    .then(function(registration) {
+        console.log('SW qeydiyyatı uğurlu.');
+
+        // Yeni versiya tapılanda dərhal aktiv et
+        registration.onupdatefound = () => {
+            const installingWorker = registration.installing;
+            installingWorker.onstatechange = () => {
+                if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    window.location.reload();
+                }
+            };
+        };
+
+        return navigator.serviceWorker.ready;
+    })
+    .then(function(activeRegistration) {
+        // İcazə istəyirik və tokeni alırıq
+        return Notification.requestPermission().then((permission) => {
+            if (permission === 'granted') {
+                return messaging.getToken({ 
+                    vapidKey: VAPID_KEY,
+                    serviceWorkerRegistration: activeRegistration 
+                });
+            }
+        });
+    })
+    .then((currentToken) => {
+        if (currentToken) {
+            // HƏR DƏFƏ SAYT AÇILANDA TOKENİ GÖNDƏRİRİK
+            // Bu, Django tərəfdə active=True olmasını təmin edir
+            sendTokenToServer(currentToken);
+        }
+    })
+    .catch((err) => {
+        console.log('Xəta baş verdi:', err);
+    });
+}
+
+// CSRF Funksiyası
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -56,67 +81,3 @@ function getCookie(name) {
     }
     return cookieValue;
 }
-
-// Xidmət işçisini qeydiyyatdan keçiririk
-// if ('serviceWorker' in navigator) {
-//     navigator.serviceWorker.register('/static/js/firebase-messaging-sw.js')
-//     .then(function(registration) {
-//         console.log('Registration successful, scope is:', registration.scope);
-//     }).catch(function(err) {
-//         console.log('Service worker registration failed, error:', err);
-//     });
-// }
-
-self.addEventListener('install', (event) => {
-    self.skipWaiting();
-});
-
-self.addEventListener('activate', (event) => {
-    event.waitUntil(clients.claim());
-});
-
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/firebase-messaging-sw.js')
-    .then(function(registration) {
-        console.log('Registration successful, scope is:', registration.scope);
-
-        // Service Worker-in tam aktiv olmasını gözləyirik
-        return navigator.serviceWorker.ready; 
-    })
-    .then(function(activeRegistration) {
-        // İndi Service Worker aktivdir, token istəyə bilərik
-        console.log('Service Worker artıq aktivdir.');
-        
-        messaging.getToken({ 
-            vapidKey: VAPID_KEY,
-            serviceWorkerRegistration: activeRegistration // Aktiv registration-u bura ötürürük
-        })
-        .then((currentToken) => {
-            if (currentToken) {
-                sendTokenToServer(currentToken);
-            }
-        })
-        .catch((err) => {
-            console.log('Token alınarkən xəta:', err);
-        });
-    })
-    .catch(function(err) {
-        console.log('Service worker registration failed:', err);
-    });
-}
-
-navigator.serviceWorker.register('/firebase-messaging-sw.js')
-  .then((registration) => {
-      // Əgər yeni bir versiya varsa, gözləmədən aktiv etsin
-      registration.onupdatefound = () => {
-          const installingWorker = registration.installing;
-          installingWorker.onstatechange = () => {
-              if (installingWorker.state === 'installed') {
-                  if (navigator.serviceWorker.controller) {
-                      console.log('Yeni versiya tapıldı, yenilənir...');
-                      window.location.reload(); // Səhifəni yeniləyib yeni SW-ni dövriyyəyə salır
-                  }
-              }
-          };
-      };
-  });
