@@ -1,7 +1,3 @@
-importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-app-sw.js');
-importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-sw.js');
-
-
 // Firebase-i tətbiq daxilində başladırıq (sw faylındakı ilə eyni konfiqurasiya)
 const firebaseConfig = {
     apiKey: "AIzaSyBlKHXjRdd47mUFx7E0Vd_jlvzbHFobHYc",

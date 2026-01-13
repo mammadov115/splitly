@@ -15,7 +15,6 @@ import os
 from dotenv import load_dotenv
 import firebase_admin
 from firebase_admin import credentials
-from decouple import config # və ya os.environ.get
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -23,17 +22,17 @@ load_dotenv(BASE_DIR / '.env')
 
 # Initialize Firebase Admin SDK
 firebase_creds = {
-    "type": config("FIREBASE_TYPE"),
-    "project_id": config("FIREBASE_PROJECT_ID"),
-    "private_key_id": config("FIREBASE_PRIVATE_KEY_ID"),
+    "type": os.getenv("FIREBASE_TYPE"),
+    "project_id": os.getenv("FIREBASE_PROJECT_ID"),
+    "private_key_id": os.getenv("FIREBASE_PRIVATE_KEY_ID"),
     # Private key-dəki \n simvollarını düzgün oxuması üçün:
-    "private_key": config("FIREBASE_PRIVATE_KEY").replace('\\n', '\n'),
-    "client_email": config("FIREBASE_CLIENT_EMAIL"),
-    "client_id": config("FIREBASE_CLIENT_ID"),
-    "auth_uri": config("FIREBASE_AUTH_URI"),
-    "token_uri": config("FIREBASE_TOKEN_URI"),
-    "auth_provider_x509_cert_url": config("FIREBASE_AUTH_PROVIDER_CERT_URL"),
-    "client_x509_cert_url": config("FIREBASE_CLIENT_CERT_URL"),
+    "private_key": os.getenv("FIREBASE_PRIVATE_KEY").replace('\\n', '\n'),
+    "client_email": os.getenv("FIREBASE_CLIENT_EMAIL"),
+    "client_id": os.getenv("FIREBASE_CLIENT_ID"),
+    "auth_uri": os.getenv("FIREBASE_AUTH_URI"),
+    "token_uri": os.getenv("FIREBASE_TOKEN_URI"),
+    "auth_provider_x509_cert_url": os.getenv("FIREBASE_AUTH_PROVIDER_CERT_URL"),
+    "client_x509_cert_url": os.getenv("FIREBASE_CLIENT_CERT_URL"),
 }
 
 cred = credentials.Certificate(firebase_creds)
