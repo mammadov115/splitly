@@ -36,6 +36,6 @@ def send_live_notification(user, title, body):
                     webpush=webpush
                 )
             )
-            manual_log(f"Firebase UGURLU: Mesaj {user.username} ucun gonderildi.")
+            log(f"Firebase UGURLU: Mesaj {user.username} ucun gonderildi.")
         except Exception as e:
-            manual_log(f"Firebase Göndərmə Xətası: {str(e)}")
+            log(f"Firebase Göndərmə Xətası: {str(e)}")
