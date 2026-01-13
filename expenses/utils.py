@@ -1,7 +1,9 @@
 from firebase_admin.messaging import Message, Notification, WebpushConfig, WebpushNotificationAction
 
 def send_live_notification(user, title, body):
+    print(f"Sending live notification to {user.username}: {title} - {body}")
     devices = FCMDevice.objects.filter(user=user, active=True)
+    print(f"Found {devices.count()} active devices for user {user.username}")
     
     if devices.exists():
         # Webpush üçün xüsusi nizamlamalar
@@ -14,13 +16,20 @@ def send_live_notification(user, title, body):
                 "requireInteraction": True, # İstifadəçi bağlamayana qədər ekranda qalsın
             }
         )
-
-        devices.send_message(
-            Message(
-                notification=Notification(
-                    title=title,
-                    body=body
-                ),
-                webpush=webpush # Web nizamlamasını əlavə etdik
+        try:
+            response = devices.send_message(
+                Message(
+                    notification=Notification(
+                        title=title,
+                        body=body
+                    ),
+                    webpush=webpush # Web nizamlamasını əlavə etdik
+                )
             )
-        )
+
+            print(f"Firebase Cavabı: {response}")
+        except Exception as e:
+            print(f"Firebase Göndərmə Xətası: {str(e)}")
+    else:
+        print(f"No active devices found for user {user.username}")
+
