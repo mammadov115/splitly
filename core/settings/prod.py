@@ -23,6 +23,3 @@ SECURE_SSL_REDIRECT = False # Əgər sayt açılmasa bunu True et
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
-# Statik və Media fayllar üçün mütləq yollar
-STATIC_ROOT = os.path.join(BASE_DIR, "static")
-MEDIA_ROOT = os.path.join(BASE_DIR, "media")
