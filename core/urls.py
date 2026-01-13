@@ -16,10 +16,18 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from fcm_django.api.rest_framework import FCMDeviceAuthorizedViewSet
+from django.views.static import serve
+import os
+from core import settings
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('firebase-messaging-sw.js', serve, {
+        'document_root': os.path.join(settings.base.BASE_DIR, 'static/js'),
+        'path': 'firebase-messaging-sw.js'
+    }),
     path("", include("expenses.urls")),
+    
+    
 ]

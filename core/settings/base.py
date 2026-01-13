@@ -20,6 +20,8 @@ from firebase_admin import credentials
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 load_dotenv(BASE_DIR / '.env')
 
+cert_path = os.path.join(BASE_DIR, 'firebase_config.json')
+
 # Initialize Firebase Admin SDK
 firebase_creds = {
     "type": os.getenv("FIREBASE_TYPE"),
@@ -35,9 +37,14 @@ firebase_creds = {
     "client_x509_cert_url": os.getenv("FIREBASE_CLIENT_CERT_URL"),
 }
 
-cred = credentials.Certificate(firebase_creds)
-firebase_admin.initialize_app(cred)
-
+# Firebase-i başlat
+try:
+        # Birbaşa fayl yolunu veririk, bu 100% işləyəcək
+        cred = credentials.Certificate(cert_path)
+        initialize_app(cred)
+        print("Firebase successfully initialized!")
+except Exception as e:
+    print(f"Firebase initialization error: {e}")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/

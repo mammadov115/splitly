@@ -55,11 +55,51 @@ function getCookie(name) {
 }
 
 // Xidmət işçisini qeydiyyatdan keçiririk
+// if ('serviceWorker' in navigator) {
+//     navigator.serviceWorker.register('/static/js/firebase-messaging-sw.js')
+//     .then(function(registration) {
+//         console.log('Registration successful, scope is:', registration.scope);
+//     }).catch(function(err) {
+//         console.log('Service worker registration failed, error:', err);
+//     });
+// }
+
+self.addEventListener('install', (event) => {
+    self.skipWaiting();
+});
+
+self.addEventListener('activate', (event) => {
+    event.waitUntil(clients.claim());
+});
+
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/static/js/firebase-messaging-sw.js')
+    navigator.serviceWorker.register('/firebase-messaging-sw.js')
     .then(function(registration) {
         console.log('Registration successful, scope is:', registration.scope);
-    }).catch(function(err) {
-        console.log('Service worker registration failed, error:', err);
+
+        // Service Worker-in tam aktiv olmasını gözləyirik
+        return navigator.serviceWorker.ready; 
+    })
+    .then(function(activeRegistration) {
+        // İndi Service Worker aktivdir, token istəyə bilərik
+        console.log('Service Worker artıq aktivdir.');
+        
+        messaging.getToken({ 
+            vapidKey: VAPID_KEY,
+            serviceWorkerRegistration: activeRegistration // Aktiv registration-u bura ötürürük
+        })
+        .then((currentToken) => {
+            if (currentToken) {
+                console.log("Token alındı:", currentToken);
+                sendTokenToServer(currentToken);
+            }
+        })
+        .catch((err) => {
+            console.log('Token alınarkən xəta:', err);
+        });
+    })
+    .catch(function(err) {
+        console.log('Service worker registration failed:', err);
     });
 }
+
