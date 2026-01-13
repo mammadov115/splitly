@@ -1,6 +1,7 @@
 from firebase_admin.messaging import Message, Notification, WebpushConfig, WebpushNotificationAction
 import datetime
 import os
+from fcm_django.models import FCMDevice
 
 
 def log(message):
