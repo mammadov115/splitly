@@ -305,8 +305,9 @@ def register_device(request):
 
             # Əgər bu token artıq varsa yeniləyirik, yoxdursa yaradırıq
             device, created = FCMDevice.objects.get_or_create(
-                registration_id=token,
-                defaults={'user': request.user, 'type': device_type}
+                user=request.user,
+                type=device_type,
+                defaults={'registration_id': token, 'active': True}
             )
             print(f"Device registration: {device}, Created: {created}")
              # Əgər cihaz artıq mövcuddursa, istifadəçini yeniləyirik
