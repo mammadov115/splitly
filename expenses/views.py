@@ -174,7 +174,6 @@ def add_expense_ajax(request):
         notification_body = f"{request.user.username} '{title}' aldı. Sənə bu xərcdən {expense.my_split} düşür."
         log(f"Preparing to send notifications for expense '{title}' to users: {[user.username for user in users_to_split]}")
         for user_to_notify in users_to_split:
-            log(f"Notifying user: {user_to_notify.username}")
             # Özümüzə bildiriş göndərmirik
             if user_to_notify != request.user:
                 # 1. Firebase Live Push Notification
@@ -184,7 +183,6 @@ def add_expense_ajax(request):
                         title=notification_title,
                         body=notification_body
                     )
-                    log(f"Live notification sent to {user_to_notify.username}")
                 except Exception as fcm_error:
                     log(f"FCM Error for {user_to_notify.username}: {fcm_error}")
 
