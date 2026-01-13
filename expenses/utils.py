@@ -2,6 +2,16 @@ from firebase_admin.messaging import Message, Notification, WebpushConfig, Webpu
 import datetime
 import os
 
+
+def log(message):
+    # Faylın tam yolunu təyin edirik (PythonAnywhere-dəki yolun)
+    log_path = os.path.join(os.path.expanduser("~"), "my_debug.txt")
+    with open(log_path, "a") as f:
+        timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        f.write(f"[{timestamp}] {message}\n")
+
+        
+
 def send_live_notification(user, title, body):
     print(f"Sending live notification to {user.username}: {title} - {body}")
     devices = FCMDevice.objects.filter(user=user, active=True)
@@ -9,6 +19,7 @@ def send_live_notification(user, title, body):
     
     if devices.exists():
         # Webpush üçün xüsusi nizamlamalar
+        log(f"Setting up WebpushConfig for user {user.username}")
         webpush = WebpushConfig(
             notification={
                 "title": title,
@@ -18,6 +29,7 @@ def send_live_notification(user, title, body):
                 "requireInteraction": True, # İstifadəçi bağlamayana qədər ekranda qalsın
             }
         )
+        log(f"WebpushConfig set up: {webpush}")
         try:
             response = devices.send_message(
                 Message(
@@ -28,17 +40,10 @@ def send_live_notification(user, title, body):
                     webpush=webpush # Web nizamlamasını əlavə etdik
                 )
             )
-
-            print(f"Firebase Cavabı: {response}")
+            log(f"Firebase Response: {response}")
         except Exception as e:
-            print(f"Firebase Göndərmə Xətası: {str(e)}")
+            log(f"Firebase Göndərmə Xətası: {str(e)}")
     else:
-        print(f"No active devices found for user {user.username}")
+        log(f"No active devices found for user {user.username}")
 
 
-def log(message):
-    # Faylın tam yolunu təyin edirik (PythonAnywhere-dəki yolun)
-    log_path = os.path.join(os.path.expanduser("~"), "my_debug.txt")
-    with open(log_path, "a") as f:
-        timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        f.write(f"[{timestamp}] {message}\n")
