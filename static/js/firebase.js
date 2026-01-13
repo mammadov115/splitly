@@ -26,7 +26,7 @@ Notification.requestPermission().then((permission) => {
 });
 
 function sendTokenToServer(token) {
-    fetch('/api/register-device/', {
+    fetch('/register-device/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -90,7 +90,6 @@ if ('serviceWorker' in navigator) {
         })
         .then((currentToken) => {
             if (currentToken) {
-                console.log("Token alındı:", currentToken);
                 sendTokenToServer(currentToken);
             }
         })

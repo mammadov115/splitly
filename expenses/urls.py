@@ -11,6 +11,6 @@ urlpatterns = [
     path('notifications/', views.NotificationListView.as_view(), name='notifications'),
     path('api/approve-split/<int:split_id>/', views.approve_split, name='approve_split'),
     path('balance/', views.BalanceView.as_view(), name='balance'),
-    path('api/register-device/', views.register_device, name='register_device'),
+    path('register-device/', views.register_device, name='register_device'),
     
 ]

@@ -10,3 +10,18 @@ firebase.initializeApp({
 });
 
 const messaging = firebase.messaging();
+
+
+// Arxa fonda mesaj gələndə onu tutub ekranda göstərmək üçün:
+messaging.onBackgroundMessage((payload) => {
+    console.log('Mesaj gəldi (Background): ', payload);
+
+    const notificationTitle = payload.notification.title;
+    const notificationOptions = {
+        body: payload.notification.body,
+        // icon: '/static/images/logo.png', // Saytının loqosunun yolu (vacib deyil, amma yaxşı olar)
+        data: { url: '/' } // Bildirişə basanda hara getsin
+    };
+
+    self.registration.showNotification(notificationTitle, notificationOptions);
+});
