@@ -42,6 +42,14 @@ const messaging = firebase.messaging();
 messaging.onBackgroundMessage((payload) => {
     console.log('[sw.js] Mesaj alındı: ', payload);
 
+    // Bildirişə klikləyəndə saytı açmaq üçün
+    self.addEventListener('notificationclick', (event) => {
+        event.notification.close();
+        event.waitUntil(
+            clients.openWindow(event.notification.data.url || '/')
+        );
+    });
+
     // Əgər notification obyekti yoxdursa, data-dan oxumağa çalışırıq
     const title = (payload.notification && payload.notification.title) || 
                   (payload.data && payload.data.title) || 

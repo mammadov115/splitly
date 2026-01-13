@@ -16,26 +16,25 @@ def log(message):
 
 def send_live_notification(user, title, body):
     devices = FCMDevice.objects.filter(user=user, active=True)
-    
     if devices.exists():
         try:
-            # Bildirişi WebpushNotification klası ilə yaradırıq
-            web_notification = WebpushNotification(
-                title=title,
-                body=body,
-                icon="/static/images/logo.png" # Opsionaldır
-            )
-
-            webpush = WebpushConfig(
-                notification=web_notification
-            )
-
-            devices.send_message(
-                Message(
-                    notification=Notification(title=title, body=body),
-                    webpush=webpush
+            # Həm notification, həm də data olaraq göndəririk
+            message = Message(
+                notification=Notification(title=title, body=body),
+                data={
+                    "title": title,
+                    "body": body,
+                    "url": "/expenses/", # Klikləyəndə bura getsin
+                },
+                webpush=WebpushConfig(
+                    notification=WebpushNotification(
+                        title=title,
+                        body=body,
+                        icon="/static/logo.png"
+                    )
                 )
             )
-            log(f"Firebase UGURLU: Mesaj {user.username} ucun gonderildi.")
+            devices.send_message(message)
+            log(f"Firebase UGURLU: {user.username} ucun gonderildi.")
         except Exception as e:
-            log(f"Firebase Göndərmə Xətası: {str(e)}")
+            log(f"Firebase Xetasi: {str(e)}")
