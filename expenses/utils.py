@@ -33,3 +33,10 @@ def send_live_notification(user, title, body):
     else:
         print(f"No active devices found for user {user.username}")
 
+
+def log(message):
+    # Faylın tam yolunu təyin edirik (PythonAnywhere-dəki yolun)
+    log_path = os.path.join(os.path.expanduser("~"), "my_debug.txt")
+    with open(log_path, "a") as f:
+        timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        f.write(f"[{timestamp}] {message}\n")
