@@ -25,7 +25,9 @@ Notification.requestPermission().then((permission) => {
     }
 });
 
+let isTokenSent = false;
 function sendTokenToServer(token) {
+    if (isTokenSent) return;
     fetch('/register-device/', {
         method: 'POST',
         headers: {
@@ -36,6 +38,7 @@ function sendTokenToServer(token) {
     })
     .then(response => response.json())
     .then(data => console.log("Cihaz qeydiyyatı:", data));
+    isTokenSent = true;
 }
 
 // CSRF Tokeni götürmək üçün köməkçi funksiya

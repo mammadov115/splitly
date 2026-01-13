@@ -307,6 +307,8 @@ def register_device(request):
                 registration_id=token,
                 defaults={'user': request.user, 'type': device_type}
             )
+            print(f"Device registration: {device}, Created: {created}")
+             # Əgər cihaz artıq mövcuddursa, istifadəçini yeniləyirik
             
             if not created:
                 device.user = request.user
