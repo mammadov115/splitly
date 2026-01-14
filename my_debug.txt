@@ -54,3 +54,5 @@
 [2026-01-14 19:14:23] Firebase UGURLU: Mehman ucun gonderildi.
 [2026-01-14 19:15:57] Preparing to send notifications for expense 'Eum dolor aspernatur' to users: ['admin', 'Mehman', 'Murad', 'Sahin']
 [2026-01-14 19:16:00] Firebase UGURLU: Mehman ucun gonderildi.
+[2026-01-14 19:16:40] Preparing to send notifications for expense 'Lorem culpa deserunt' to users: ['admin', 'Mehman', 'Murad', 'Sahin']
+[2026-01-14 19:16:41] Firebase UGURLU: Mehman ucun gonderildi.
