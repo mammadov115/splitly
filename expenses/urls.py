@@ -12,5 +12,6 @@ urlpatterns = [
     path('api/approve-split/<int:split_id>/', views.approve_split, name='approve_split'),
     path('balance/', views.BalanceView.as_view(), name='balance'),
     path('register-device/', views.register_device, name='register_device'),
+    path('log-sw/', views.log_from_sw, name='log_sw'),
     
 ]

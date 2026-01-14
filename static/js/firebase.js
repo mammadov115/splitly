@@ -40,6 +40,7 @@ if ('serviceWorker' in navigator) {
                 }
             };
         };
+        console.log('Service Worker qeydiyyatı:', registration);
 
         return navigator.serviceWorker.ready;
     })
@@ -64,6 +65,8 @@ if ('serviceWorker' in navigator) {
     .catch((err) => {
         console.log('Xəta baş verdi:', err);
     });
+}else {
+    console.warn('Service Worker dəstəklənmir.');
 }
 
 // CSRF Funksiyası

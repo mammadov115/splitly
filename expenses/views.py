@@ -175,7 +175,7 @@ def add_expense_ajax(request):
         log(f"Preparing to send notifications for expense '{title}' to users: {[user.username for user in users_to_split]}")
         for user_to_notify in users_to_split:
             # Özümüzə bildiriş göndərmirik
-            if user_to_notify != request.user:
+            if True:
                 # 1. Firebase Live Push Notification
                 try:
                     send_live_notification(
@@ -321,3 +321,17 @@ def register_device(request):
             return JsonResponse({"status": "error", "message": str(e)}, status=400)
     
     return JsonResponse({"status": "error", "message": "İcazə yoxdur"}, status=403)
+
+@csrf_exempt # SW-dən gələn sorğularda CSRF problemi olmasın deyə
+def log_from_sw(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            log_message = data.get('message', 'Boş mesaj')
+            # Sənin bayaqkı log funksiyanı çağırırıq
+            log(f"SW LOG: {log_message}") 
+            return JsonResponse({"status": "ok"})
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)})
+    return JsonResponse({"status": "fail"})
+

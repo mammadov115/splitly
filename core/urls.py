@@ -19,14 +19,24 @@ from django.urls import path, include
 from django.views.static import serve
 import os
 from core import settings
+from django.views.generic import TemplateView
+from django.http import HttpResponse
 
+
+# Service Worker faylını oxuyub qaytaran balaca bir funksiya
+def service_worker(request):
+    # Faylın tam yolunu tapırıq (manage.py olan qovluqda)
+    sw_path = os.path.join(settings.base.BASE_DIR, 'firebase-messaging-sw.js')
+    with open(sw_path, 'rb') as f:
+        return HttpResponse(f.read(), content_type="application/javascript")
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('firebase-messaging-sw.js', serve, {
-        'document_root': os.path.join(settings.base.BASE_DIR, 'static/js'),
-        'path': 'firebase-messaging-sw.js'
-    }),
+    # path('firebase-messaging-sw.js', serve, {
+    #     'document_root': os.path.join(settings.base.BASE_DIR, 'static/js'),
+    #     'path': 'firebase-messaging-sw.js'
+    # }),
+    path('firebase-messaging-sw.js', service_worker),
     path("", include("expenses.urls")),
     
     
