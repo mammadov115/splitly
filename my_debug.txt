@@ -34,3 +34,23 @@
 [2026-01-14 17:42:37] Firebase UGURLU: Mehman ucun gonderildi.
 [2026-01-14 17:51:24] Preparing to send notifications for expense 'Dolore quia cillum e' to users: ['admin', 'Mehman', 'Murad', 'Sahin']
 [2026-01-14 17:51:24] Firebase UGURLU: Mehman ucun gonderildi.
+[2026-01-14 18:56:22] Preparing to send notifications for expense 'Quas exercitationem ' to users: ['admin', 'Mehman', 'Murad', 'Sahin']
+[2026-01-14 18:56:22] Firebase Xetasi: name 'messaging' is not defined
+[2026-01-14 19:06:40] Preparing to send notifications for expense 'Enim ratione irure o' to users: ['admin', 'Mehman', 'Murad', 'Sahin']
+[2026-01-14 19:06:40] Firebase Xetasi: name 'messaging' is not defined
+[2026-01-14 19:07:33] Preparing to send notifications for expense 'Rerum sunt qui culp' to users: ['admin', 'Mehman', 'Murad', 'Sahin']
+[2026-01-14 19:07:33] Firebase Xetasi: name 'messaging' is not defined
+[2026-01-14 19:11:23] Preparing to send notifications for expense 'Aperiam voluptatem ' to users: ['admin', 'Mehman', 'Murad', 'Sahin']
+[2026-01-14 19:11:23] Firebase Xetasi: name 'user_token' is not defined
+[2026-01-14 19:13:12] Preparing to send notifications for expense 'Dolores accusamus in' to users: ['admin', 'Mehman', 'Murad', 'Sahin']
+[2026-01-14 19:13:15] Preparing to send notifications for expense 'Dolores accusamus in' to users: ['admin', 'Mehman', 'Murad', 'Sahin']
+[2026-01-14 19:13:17] Firebase UGURLU: Mehman ucun gonderildi.
+[2026-01-14 19:13:17] Firebase UGURLU: Mehman ucun gonderildi.
+[2026-01-14 19:13:36] Preparing to send notifications for expense 'Ea autem eum sint qu' to users: ['admin', 'Mehman', 'Murad', 'Sahin']
+[2026-01-14 19:13:36] Firebase Xetasi: 'FCMDevice' object has no attribute 'token'
+[2026-01-14 19:13:51] Preparing to send notifications for expense 'Aut laudantium volu' to users: ['admin', 'Mehman', 'Murad', 'Sahin']
+[2026-01-14 19:13:55] Firebase UGURLU: Mehman ucun gonderildi.
+[2026-01-14 19:14:20] Preparing to send notifications for expense 'Aut laudantium volu' to users: ['admin', 'Mehman', 'Murad', 'Sahin']
+[2026-01-14 19:14:23] Firebase UGURLU: Mehman ucun gonderildi.
+[2026-01-14 19:15:57] Preparing to send notifications for expense 'Eum dolor aspernatur' to users: ['admin', 'Mehman', 'Murad', 'Sahin']
+[2026-01-14 19:16:00] Firebase UGURLU: Mehman ucun gonderildi.

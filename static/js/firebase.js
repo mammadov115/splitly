@@ -27,46 +27,12 @@ function sendTokenToServer(token) {
 
 // 3. Əsas Aktivləşdirmə Məntiqi
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/firebase-messaging-sw.js')
-    .then(function(registration) {
-        console.log('SW qeydiyyatı uğurlu.');
-
-        // Yeni versiya tapılanda dərhal aktiv et
-        registration.onupdatefound = () => {
-            const installingWorker = registration.installing;
-            installingWorker.onstatechange = () => {
-                if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                    window.location.reload();
-                }
-            };
-        };
-        console.log('Service Worker qeydiyyatı:', registration);
-
-        return navigator.serviceWorker.ready;
-    })
-    .then(function(activeRegistration) {
-        // İcazə istəyirik və tokeni alırıq
-        return Notification.requestPermission().then((permission) => {
-            if (permission === 'granted') {
-                return messaging.getToken({ 
-                    vapidKey: VAPID_KEY,
-                    serviceWorkerRegistration: activeRegistration 
-                });
-            }
-        });
-    })
-    .then((currentToken) => {
-        if (currentToken) {
-            // HƏR DƏFƏ SAYT AÇILANDA TOKENİ GÖNDƏRİRİK
-            // Bu, Django tərəfdə active=True olmasını təmin edir
-            sendTokenToServer(currentToken);
-        }
-    })
-    .catch((err) => {
-        console.log('Xəta baş verdi:', err);
+    navigator.serviceWorker.register('/firebase-messaging-sw.js') // Sonda / YOXDUR
+    .then((registration) => {
+        console.log('SW Qeydiyyatı OK:', registration.scope);
+    }).catch((err) => {
+        console.error('SW Qeydiyyat xətası:', err);
     });
-}else {
-    console.warn('Service Worker dəstəklənmir.');
 }
 
 // CSRF Funksiyası

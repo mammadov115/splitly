@@ -21,20 +21,13 @@ def send_live_notification(user, title, body):
         try:
             # Həm notification, həm də data olaraq göndəririk
             message = Message(
-                notification=Notification(title=title, body=body),
-                data={
-                    "title": title,
-                    "body": body,
-                    "url": "/expenses/", # Klikləyəndə bura getsin
+                data={ # Notification yox, məhz DATA istifadə edirik ki, SW mütləq işə düşsün
+                    'title': 'Xərc əlavə edildi',
+                    'body': 'Məbləğ: 50 AZN',
                 },
-                webpush=WebpushConfig(
-                    notification=WebpushNotification(
-                        title=title,
-                        body=body,
-                        icon="/static/logo.png"
-                    )
-                )
+                token=devices.first().registration_id,  # Yalnız bir cihaz üçün nümunə
             )
+
             devices.send_message(message)
             log(f"Firebase UGURLU: {user.username} ucun gonderildi.")
         except Exception as e:
