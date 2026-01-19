@@ -63,3 +63,4 @@
 [2026-01-19 17:12:21] Firebase UGURLU: Mehman ucun gonderildi.
 [2026-01-19 17:17:52] Preparing to send notifications for expense 'Harum culpa expedita' to users: ['Mehman', 'Murad', 'Sahin', 'guhakopem']
 [2026-01-19 17:17:58] Preparing to send notifications for expense 'Consectetur delectus' to users: ['Mehman', 'Murad', 'Sahin', 'guhakopem']
+[2026-01-19 17:55:36] Preparing to send notifications for expense 'Vel officia minus vo' to users: ['Mehman', 'Murad', 'Sahin', 'guhakopem']
