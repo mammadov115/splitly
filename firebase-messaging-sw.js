@@ -1,6 +1,16 @@
 importScripts('https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.22.1/firebase-messaging-compat.js');
 
+// Yeni versiya yüklənən kimi dərhal aktivləşsin
+self.addEventListener('install', (event) => {
+    self.skipWaiting();
+});
+
+// Köhnə SW-ni dərhal əvəz etsin
+self.addEventListener('activate', (event) => {
+    event.waitUntil(self.clients.claim());
+});
+
 firebase.initializeApp({
     apiKey: "AIzaSyBlKHXjRdd47mUFx7E0Vd_jlvzbHFobHYc",
     projectId: "expenses-74419",

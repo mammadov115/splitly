@@ -28,7 +28,12 @@ def service_worker(request):
     # Faylın tam yolunu tapırıq (manage.py olan qovluqda)
     sw_path = os.path.join(settings.base.BASE_DIR, 'firebase-messaging-sw.js')
     with open(sw_path, 'rb') as f:
-        return HttpResponse(f.read(), content_type="application/javascript")
+        response = HttpResponse(f.read(), content_type="application/javascript")
+        # Keşləmənin qarşısını almaq üçün başlıqlar:
+        response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response['Pragma'] = 'no-cache'
+        response['Expires'] = '0'
+        return response
 
 urlpatterns = [
     path('admin/', admin.site.urls),

@@ -11,40 +11,15 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
-import os   
+import os
 from dotenv import load_dotenv
-import firebase_admin
-from firebase_admin import credentials
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 load_dotenv(BASE_DIR / '.env')
 
-cert_path = os.path.join(BASE_DIR, 'firebase_config.json')
-
-# Initialize Firebase Admin SDK
-firebase_creds = {
-    "type": os.getenv("FIREBASE_TYPE"),
-    "project_id": os.getenv("FIREBASE_PROJECT_ID"),
-    "private_key_id": os.getenv("FIREBASE_PRIVATE_KEY_ID"),
-    # Private key-dəki \n simvollarını düzgün oxuması üçün:
-    "private_key": os.getenv("FIREBASE_PRIVATE_KEY").replace('\\n', '\n'),
-    "client_email": os.getenv("FIREBASE_CLIENT_EMAIL"),
-    "client_id": os.getenv("FIREBASE_CLIENT_ID"),
-    "auth_uri": os.getenv("FIREBASE_AUTH_URI"),
-    "token_uri": os.getenv("FIREBASE_TOKEN_URI"),
-    "auth_provider_x509_cert_url": os.getenv("FIREBASE_AUTH_PROVIDER_CERT_URL"),
-    "client_x509_cert_url": os.getenv("FIREBASE_CLIENT_CERT_URL"),
-}
-
-# Firebase-i başlat
-try:
-        # Birbaşa fayl yolunu veririk, bu 100% işləyəcək
-        cred = credentials.Certificate(cert_path)
-        firebase_admin.initialize_app(cred)
-        print("Firebase successfully initialized!")
-except Exception as e:
-    print(f"Firebase initialization error: {e}")
+# Firebase konfiqurasiya faylının yolu
+FIREBASE_CERT_PATH = os.path.join(BASE_DIR, 'firebase_config.json')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -148,9 +123,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
+LANGUAGE_CODE = 'az'
 
 USE_I18N = True
 
@@ -173,8 +146,3 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'home'
-
-
-LANGUAGE_CODE = 'az'
-USE_I18N = True  
-USE_L10N = True

@@ -54,6 +54,13 @@ $(document).ready(function() {
             split_with: selectedUsers
         };
 
+        const $submitBtn = $('#btn-submit-expense');
+        const originalBtnHtml = $submitBtn.html();
+
+        // Düyməni yüklənmə vəziyyətinə gətir
+        $submitBtn.prop('disabled', true).addClass('opacity-70 cursor-not-allowed');
+        $submitBtn.find('span').text('Təsdiq edilir...');
+
         $.ajax({
             url: '/api/add-expense/', 
             type: 'POST',
@@ -116,8 +123,15 @@ $(document).ready(function() {
                 $('#modal-expense').addClass('hidden');
                 $('#form-add-expense')[0].reset();
                 resetUserSelection();
+                
+                // Düyməni bərpa et
+                $submitBtn.prop('disabled', false).removeClass('opacity-70 cursor-not-allowed');
+                $submitBtn.html(originalBtnHtml);
             },
             error: function(xhr) {
+                // Xəta halında düyməni bərpa et
+                $submitBtn.prop('disabled', false).removeClass('opacity-70 cursor-not-allowed');
+                $submitBtn.html(originalBtnHtml);
                 alert('Xəta: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Məlumat yadda saxlanılmadı'));
             }
         });

@@ -18,4 +18,4 @@ RUN pip install poetry==2.1.3
 RUN poetry config virtualenvs.create false && poetry install --only main
 
 # Django runserver command
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000", "--settings=config.settings.prod"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000", "--settings=core.settings.prod"]
