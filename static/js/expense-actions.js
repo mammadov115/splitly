@@ -5,27 +5,40 @@ $(document).ready(function() {
     let pressTimer = null;
 
     // --- LONG PRESS HANDLER ---
-    $(document).on('touchstart mousedown', '.expense-card', function(e) {
-        // If we are in edit mode, don't trigger long press
-        if ($(this).find('.edit-mode').is(':visible')) return;
-
+    $(document).on('pointerdown', '.expense-card', function(e) {
+        // Only trigger on left click or touch
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        
         const $card = $(this);
+        
+        // If we are in edit mode, don't trigger long press
+        if ($card.find('.edit-mode').is(':visible')) return;
+
         activeExpenseId = $card.data('expense-id');
         
+        // Visual feedback
+        $card.addClass('scale-[0.96] brightness-95');
+        
         pressTimer = setTimeout(() => {
+            // Haptic effect
+            if (window.navigator.vibrate) {
+                window.navigator.vibrate(50);
+            }
+
+            // Open Bottom Sheet
             $('#bottom-sheet-actions').removeClass('hidden');
             setTimeout(() => {
                 $('#bottom-sheet-content').removeClass('translate-y-full').addClass('translate-y-0');
             }, 10);
             
-            if (window.navigator.vibrate) {
-                window.navigator.vibrate(50);
-            }
-        }, 500);
+            // Clean up visual feedback
+            $card.removeClass('scale-[0.96] brightness-95');
+        }, 600);
     });
 
-    $(document).on('touchend mouseup mouseleave', '.expense-card', function() {
+    $(document).on('pointerup pointerleave', '.expense-card', function() {
         clearTimeout(pressTimer);
+        $(this).removeClass('scale-[0.96] brightness-95');
     });
 
     $(document).on('contextmenu', '.expense-card', function(e) {
@@ -100,9 +113,10 @@ $(document).ready(function() {
         }).get();
 
         $card.find('.edit-user-item').each(function() {
-            const uid = $(this).data('id');
-            const $chip = $(this).find('.chip');
-            const $name = $(this).find('span');
+            const uid = parseInt($(this).data('id'));
+            const $item = $(this);
+            const $chip = $item.find('.chip');
+            const $name = $item.find('span');
             
             if (currentSplitIds.includes(uid)) {
                 $(this).addClass('active-user');
