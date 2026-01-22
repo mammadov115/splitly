@@ -12,6 +12,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import OuterRef, Subquery, Sum
 import json
 from decimal import Decimal
+from django.db import transaction
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
@@ -366,6 +367,44 @@ class BalanceView(LoginRequiredMixin, TemplateView):
         
         return context
     
+
+@login_required
+@require_POST
+def update_expense_ajax(request, expense_id):
+    try:
+        expense = get_object_or_404(Expense, id=expense_id, paid_by=request.user)
+        data = json.loads(request.body)
+        
+        title = data.get('title')
+        amount = Decimal(str(data.get('amount')))
+        user_ids = data.get('split_with', [])
+
+        if not title or amount <= 0:
+            return JsonResponse({'success': False, 'error': 'Məlumatlar tam deyil'}, status=400)
+
+        with transaction.atomic():
+            expense.title = title
+            expense.amount = amount
+            expense.save()
+
+            if not user_ids:
+                user_ids = [request.user.id]
+            
+            users_to_split = User.objects.filter(id__in=user_ids)
+            expense.split_expense(users_to_split)
+
+        return HttpResponse(status=200)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+
+@login_required
+@require_POST
+def delete_expense(request, expense_id):
+    expense = get_object_or_404(Expense, id=expense_id, paid_by=request.user)
+    expense.delete()
+    return JsonResponse({'status': 'success', 'message': 'Xərc silindi'})
+
 
 @csrf_exempt
 def register_device(request):

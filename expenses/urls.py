@@ -11,6 +11,8 @@ urlpatterns = [
     path('notifications/', views.NotificationListView.as_view(), name='notifications'),
     path('api/approve-split/<int:split_id>/', views.approve_split, name='approve_split'),
     path('balance/', views.BalanceView.as_view(), name='balance'),
+    path('api/update-expense/<int:expense_id>/', views.update_expense_ajax, name='update_expense'),
+    path('api/delete-expense/<int:expense_id>/', views.delete_expense, name='delete_expense'),
     path('register-device/', views.register_device, name='register_device'),
     
 ]

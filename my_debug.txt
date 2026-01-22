@@ -1,0 +1,12 @@
+[2026-01-22 16:52:00] Preparing to send notifications for expense 'Corek' to users: ['Mehman', 'Murad', 'Sahin', 'guhakopem', 'mehmanmehman182@gmail.com']
+[2026-01-22 16:52:01] Firebase lazy initialization successful.
+[2026-01-22 16:52:05] Firebase UGURLU: guhakopem ucun gonderildi.
+[2026-01-22 18:17:25] Preparing to send notifications for expense 'Corek' to users: ['Mehman', 'Murad', 'Sahin', 'guhakopem', 'mehmanmehman182@gmail.com']
+[2026-01-22 18:17:26] Firebase lazy initialization successful.
+[2026-01-22 18:17:29] Firebase UGURLU: guhakopem ucun gonderildi.
+[2026-01-22 18:22:56] Preparing to send notifications for expense 'Corek' to users: ['Mehman', 'Murad', 'Sahin', 'guhakopem', 'mehmanmehman182@gmail.com']
+[2026-01-22 18:22:57] Firebase UGURLU: guhakopem ucun gonderildi.
+[2026-01-22 18:23:37] Preparing to send notifications for expense 'Sapiente blanditiis ' to users: ['Mehman', 'Murad', 'Sahin', 'guhakopem', 'mehmanmehman182@gmail.com']
+[2026-01-22 18:23:37] Firebase UGURLU: guhakopem ucun gonderildi.
+[2026-01-22 18:24:40] Preparing to send notifications for expense 'Sapiente blanditiis ' to users: ['Mehman', 'Murad', 'Sahin', 'guhakopem', 'mehmanmehman182@gmail.com']
+[2026-01-22 18:24:40] Firebase UGURLU: guhakopem ucun gonderildi.

@@ -2,76 +2,102 @@
 
 
 
-    <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 mb-4">
-        <div class="flex justify-between items-start mb-4">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center text-orange-600">
-                    <i class="fa-solid fa-cart-shopping"></i>
+    <div class="expense-card bg-white rounded-3xl p-5 shadow-sm border border-slate-100 mb-4 transition-all active:scale-[0.98] duration-200 cursor-pointer select-none relative overflow-hidden" data-expense-id="{{ expense.id }}">
+        <!-- Display Mode -->
+        <div class="display-mode transition-all duration-300">
+            <div class="flex justify-between items-start mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center text-orange-600">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-800 leading-tight expense-title-text">{{ expense.title }}</h3>
+                        <p class="text-xs text-slate-400 font-medium">
+                            {% if expense.date|naturalday == "today" %}
+                                Bu gün, {{ expense.date|date:"H:i" }}
+                            {% elif expense.date|naturalday == "yesterday" %}
+                                Dünən, {{ expense.date|date:"H:i" }}
+                            {% else %}
+                                {{ expense.date|date:"d E" }}, {{ expense.date|date:"H:i" }} 
+                            {% endif %}
+                        </p>
+                    </div>
                 </div>
-                <div>
-                    <h3 class="font-bold text-slate-800 leading-tight">{{ expense.title }}</h3>
-                    <p class="text-xs text-slate-400 font-medium">
-                        {% if expense.date|naturalday == "today" %}
-                            Bu gün, {{ expense.date|date:"H:i" }}
-                        {% elif expense.date|naturalday == "yesterday" %}
-                            Dünən, {{ expense.date|date:"H:i" }}
-                        {% else %}
-                            {{ expense.date|date:"d E" }}, {{ expense.date|date:"H:i" }} 
-                            {# "d E" formatı "07 Yanvar" kimi çıxarır #}
-                        {% endif %}
-                    </p>
+                
+                <div class="text-right">
+                    <span class="text-lg font-bold text-slate-800 expense-amount-text">{{ expense.amount }} AZN</span>
+                    <p class="text-[10px] text-indigo-500 font-bold uppercase">Sən ödədin</p>
                 </div>
             </div>
-            <div class="text-right">
-                <span class="text-lg font-bold text-slate-800">{{ expense.amount }} AZN</span>
-                <p class="text-[10px] text-indigo-500 font-bold uppercase">Sən ödədin</p>
+            
+            <div class="splits-container space-y-3 bg-slate-50 rounded-2xl p-3">
+                <div class="flex justify-between items-center text-sm" data-user-id="{{ request.user.id }}">
+                    <span class="text-slate-600 flex items-center gap-2">        
+                        <span class="w-2 h-2 rounded-full bg-green-500"></span> 
+                        Sən  
+                    </span>
+                    <span class="font-bold text-slate-700"> {{ expense.my_split.amount_owed }} ₼ 
+                        <i class="fa-solid fa-check-circle ml-1 text-green-500"></i>
+                    </span>
+                </div>
+
+                {% for split in expense.other_splits %}
+                    <div class="flex justify-between items-center text-sm" data-user-id="{{ split.user.id }}">
+                        <span class="text-slate-600 flex items-center gap-2">
+                            {% if split.is_settled %}
+                                <span class="w-2 h-2 rounded-full bg-green-500"></span> 
+                            {% else %}
+                                <span class="w-2 h-2 rounded-full bg-slate-300"></span> 
+                            {% endif %}
+                            {{ split.user.first_name }} {{ split.user.last_name }}
+                        </span>
+                        <span class="font-bold text-slate-700"> {{ split.amount_owed }} ₼ 
+                        {% if split.is_settled %}
+                            <i class="fa-solid fa-check-circle ml-1 text-green-500"></i></span>
+                        {% else %}
+                            <i class="fa-solid fa-circle-xmark ml-1 text-slate-300"></i></span>
+                        {% endif %}
+                    </div>
+                {% endfor %}
             </div>
         </div>
-        
-        <div class="space-y-3 bg-slate-50 rounded-2xl p-3">
-            <div class="flex justify-between items-center text-sm">
-                <span class="text-slate-600 flex items-center gap-2">        
-                    <span class="w-2 h-2 rounded-full bg-green-500"></span> 
-                    Sən  
-                </span>
-                <span class="font-bold text-slate-700"> {{ expense.my_split.amount_owed }} ₼ 
 
-                    <i class="fa-solid fa-check-circle ml-1 text-green-500"></i>
-                </span>
-            </div>
-
-            {% for split in expense.other_splits %}
-                <div class="flex justify-between items-center text-sm">
-                    <span class="text-slate-600 flex items-center gap-2">
-                        {% if split.is_settled %}
-                            <span class="w-2 h-2 rounded-full bg-green-500"></span> 
-                        {% else %}
-                            <span class="w-2 h-2 rounded-full bg-slate-300"></span> 
-                        {% endif %}
-
-                        
-                        {{ split.user.first_name }} {{ split.user.last_name }}
-                        
-                    </span>
-                    <span class="font-bold text-slate-700"> {{ split.amount_owed }} ₼ 
-                    {% if split.is_settled %}
-                        <i class="fa-solid fa-check-circle ml-1 text-green-500"></i></span>
-                    {% else %}
-                        <i class="fa-solid fa-circle-xmark ml-1 text-slate-300"></i></span>
-                    {% endif %}
+        <!-- Edit Mode (Hidden by default) -->
+        <div class="edit-mode hidden animate-in fade-in zoom-in duration-300">
+            <div class="space-y-4">
+                <div class="flex gap-3">
+                    <div class="w-12 h-12 bg-indigo-100 rounded-2xl flex items-center justify-center text-indigo-600 shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                        </svg>
+                    </div>
+                    <div class="flex-1 space-y-2">
+                        <input type="text" class="edit-title w-full bg-slate-100 border-none rounded-xl p-2 text-sm font-bold focus:ring-2 focus:ring-indigo-200 outline-none" value="{{ expense.title }}">
+                        <input type="number" step="0.01" class="edit-amount w-full bg-slate-100 border-none rounded-xl p-2 text-lg font-black focus:ring-2 focus:ring-indigo-200 outline-none" value="{{ expense.amount|stringformat:".2f" }}">
+                    </div>
                 </div>
-            {% endfor %}
-            {% comment %} <div class="flex justify-between items-center text-sm">
-                <span class="text-slate-600 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-slate-300"></span> Elvin
-                </span>
-                <span class="font-bold text-slate-700">5.00 ₼ <i class="fa-solid fa-circle-xmark ml-1 text-slate-300"></i></span>
+
+                <div class="bg-slate-50 rounded-2xl p-4">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase mb-3 px-1">Kimlə bölürsən?</p>
+                    <div class="edit-user-selector flex gap-3 overflow-x-auto pb-2 custom-scrollbar">
+                        <!-- User chips for editing -->
+                        <div class="edit-user-item shrink-0 cursor-pointer flex flex-col items-center gap-1 active-user" data-id="{{ request.user.id }}">
+                            <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xs font-bold shadow-md chip">S</div>
+                            <span class="text-[10px] font-bold text-indigo-600">Sən</span>
+                        </div>
+                        {% for user in all_users %}
+                            <div class="edit-user-item shrink-0 cursor-pointer flex flex-col items-center gap-1" data-id="{{ user.id }}">
+                                <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center text-xs font-bold chip">{{ user.first_name|make_list|first|upper }}</div>
+                                <span class="text-[10px] font-bold text-slate-400">{{ user.first_name }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="flex gap-2 pt-2">
+                    <button class="btn-cancel-edit flex-1 py-4 rounded-2xl font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 transition-colors text-xs">Ləğv et</button>
+                    <button class="btn-save-edit flex-1 py-4 rounded-2xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-colors text-xs">Yadda saxla</button>
+                </div>
             </div>
-            <div class="flex justify-between items-center text-sm">
-                <span class="text-slate-600 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-slate-300"></span> Orxan
-                </span>
-                <span class="font-bold text-slate-700">5.00 ₼ <i class="fa-solid fa-circle-xmark ml-1 text-slate-300"></i></span>
-            </div> {% endcomment %}
         </div>
     </div>
