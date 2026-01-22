@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="az">
 <head>
@@ -157,12 +158,12 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js"></script>
     
-    <script src="/static/js/utils.js"></script>
-    <script src="/static/js/expense-add.js"></script>
-    <script src="/static/js/expense-actions.js"></script>
-    <script src="/static/js/share.js"></script>
-    <script src="/static/js/waiting-button.js"></script>
-    <script src="/static/js/profile-dropdown.js"></script>
-    <script src="/static/js/firebase.js"></script>
+    <script src="{% static 'js/utils.js' %}"></script>
+    <script src="{% static 'js/expense-add.js' %}"></script>
+    <script src="{% static 'js/expense-actions.js' %}"></script>
+    <script src="{% static 'js/share.js' %}"></script>
+    <script src="{% static 'js/waiting-button.js' %}"></script>
+    <script src="{% static 'js/profile-dropdown.js' %}"></script>
+    <script src="{% static 'js/firebase.js' %}"></script>
 </body>
 </html>
