@@ -19,86 +19,6 @@
     {% include "partials/navbar.html" %}
 
     <main class="max-w-md mx-auto px-6 mt-8">
-        <!--<div class="bg-indigo-600 rounded-[2.5rem] p-8 shadow-xl shadow-indigo-200 mb-8 relative overflow-hidden">
-            <div class="relative z-10">
-                <p class="text-indigo-100 text-sm font-medium opacity-80">Sənə borcludurlar (Cəmi)</p>
-                <h2 class="text-4xl font-black text-white mt-1">45.50 ₼</h2>
-                
-                <div class="flex gap-4 mt-6">
-                    <div class="bg-white/10 backdrop-blur-md rounded-2xl p-3 flex-1">
-                        <p class="text-[10px] text-indigo-100 uppercase font-bold">Sənin borcun</p>
-                        <p class="text-lg font-bold text-white">12.00 ₼</p>
-                    </div>
-                    <div class="bg-white/10 backdrop-blur-md rounded-2xl p-3 flex-1">
-                        <p class="text-[10px] text-indigo-100 uppercase font-bold">Xalis Alacaq</p>
-                        <p class="text-lg font-bold text-white">33.50 ₼</p>
-                    </div>
-                </div>
-            </div>
-            <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full"></div>
-        </div>
-
-        <div class="mb-8">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-black text-slate-800">Otaq Yoldaşların</h3>
-                <span class="text-[10px] bg-slate-200 text-slate-600 px-2 py-1 rounded-full font-black uppercase">3 Nəfər</span>
-            </div>
-            
-            <div class="space-y-4">
-                <div class="bg-white rounded-3xl p-4 flex items-center justify-between shadow-sm border border-slate-50 transition-transform active:scale-95 cursor-pointer">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-amber-100 rounded-2xl flex items-center justify-center font-black text-amber-600 text-lg">
-                            M
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-slate-800">Mehman M.</h4>
-                            <p class="text-[10px] text-green-500 font-black uppercase tracking-wider">Sənə borcludur</p>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-lg font-black text-slate-800">15.50 ₼</p>
-                        <button class="text-[10px] bg-indigo-50 text-indigo-600 px-2 py-1 rounded-lg font-bold uppercase mt-1">
-                            Xatırlat
-                        </button>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-3xl p-4 flex items-center justify-between shadow-sm border border-slate-50">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center font-black text-slate-500 text-lg">
-                            N
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-slate-800">Nurlan S.</h4>
-                            <p class="text-[10px] text-red-500 font-black uppercase tracking-wider">Borcun var</p>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-lg font-black text-slate-800">6.00 ₼</p>
-                        <span class="text-[10px] bg-red-50 text-red-600 px-2 py-1 rounded-lg font-bold uppercase mt-1 block">Ödənilməli</span>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-3xl p-4 flex items-center justify-between shadow-sm border border-slate-50 opacity-60">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center font-black text-slate-400 text-lg">
-                            E
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-slate-800">Elvin K.</h4>
-                            <p class="text-[10px] text-slate-400 font-black uppercase tracking-wider">Hesab təmizdir</p>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-lg font-black text-slate-300">0.00 ₼</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <h3 class="text-lg font-black text-slate-800 mb-4">Son Xərclər</h3>
-        <div id="expenses-list">
-        </div>-->
         <div class="grid grid-cols-2 gap-4 mb-8">
             <div class="bg-emerald-50 border border-emerald-100 p-5 rounded-[2rem]">
                 <p class="text-[10px] font-black text-emerald-600 uppercase mb-1">Alacaqlar</p>
@@ -111,45 +31,27 @@
         </div>
 
         <section class="mb-8">
-            <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Kimlər borcludur?</h3>
+            <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Ümumi Hesablaşmalar</h3>
             <div class="space-y-3">
-                {% for item in receivables %}
+                {% for item in balances %}
                 <div class="bg-white p-4 rounded-3xl border border-slate-100 flex items-center justify-between shadow-sm">
                     <div class="flex items-center gap-3">
-                        <img src="https://ui-avatars.com/api/?name={{ item.user__first_name|default:item.user__username }}&background=dcfce7&color=059669" class="w-10 h-10 rounded-xl">
+                        <img src="https://ui-avatars.com/api/?name={{ item.first_name|default:item.username }}&background={% if item.amount > 0 %}dcfce7{% else %}fee2e2{% endif %}&color={% if item.amount > 0 %}059669{% else %}dc2626{% endif %}" class="w-10 h-10 rounded-xl">
                         <div>
-                            <h4 class="font-bold text-slate-800 text-sm">{{ item.user__first_name }} {{ item.user__last_name }}</h4>
-                            <p class="text-[10px] text-slate-400 font-bold uppercase">Sənə borcludur</p>
+                            <h4 class="font-bold text-slate-800 text-sm">{{ item.first_name }} {{ item.last_name }}</h4>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase">
+                                {% if item.amount > 0 %}Sənə borcludur{% else %}Ona borcun var{% endif %}
+                            </p>
                         </div>
                     </div>
                     <div class="text-right">
-                        <p class="text-md font-black text-emerald-600">+{{ item.total_amount|floatformat:2 }} ₼</p>
+                        <p class="text-md font-black {% if item.amount > 0 %}text-emerald-600{% else %}text-red-600{% endif %}">
+                            {% if item.amount > 0 %}+{% else %}-{% endif %}{{ item.abs_amount|floatformat:2 }} ₼
+                        </p>
                     </div>
                 </div>
                 {% empty %}
-                <p class="text-center text-slate-400 text-xs py-4">Heç kimin borcu yoxdur 🎉</p>
-                {% endfor %}
-            </div>
-        </section>
-
-        <section>
-            <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Sənin borcların</h3>
-            <div class="space-y-3">
-                {% for item in debts %}
-                <div class="bg-white p-4 rounded-3xl border border-slate-100 flex items-center justify-between shadow-sm">
-                    <div class="flex items-center gap-3">
-                        <img src="https://ui-avatars.com/api/?name={{ item.expense__paid_by__first_name|default:item.expense__paid_by__username }}&background=fee2e2&color=dc2626" class="w-10 h-10 rounded-xl">
-                        <div>
-                            <h4 class="font-bold text-slate-800 text-sm">{{ item.expense__paid_by__first_name }} {{ item.expense__paid_by__last_name }}</h4>
-                            <p class="text-[10px] text-slate-400 font-bold uppercase">Ona borcun var</p>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-md font-black text-red-600">-{{ item.total_amount|floatformat:2 }} ₼</p>
-                    </div>
-                </div>
-                {% empty %}
-                <p class="text-center text-slate-400 text-xs py-4">Borcun yoxdur! 😎</p>
+                <p class="text-center text-slate-400 text-xs py-4">Heç bir borc və ya alacaq yoxdur! 😎</p>
                 {% endfor %}
             </div>
         </section>

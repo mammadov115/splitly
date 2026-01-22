@@ -262,37 +262,109 @@ def approve_split(request, split_id):
 class BalanceView(LoginRequiredMixin, TemplateView):
     template_name = 'balance.html'
 
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-    #     user = self.request.user
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
 
-    #     # 1. Alacaqlar: Mənim yaratdığım xərclər üzrə hələ ödənilməmiş (is_settled=False) olanlar
-    #     receivables = ExpenseSplit.objects.filter(
-    #         expense__paid_by=user,
-    #         is_settled=False
-    #     ).values('user__first_name', 'user__last_name', 'user__username', 'user__id').annotate(
-    #         total_amount=Sum('amount_owed')
-    #     )
+        # 1. Alacaqlar: Others owe me (I paid, they haven't settled)
+        receivables_qs = ExpenseSplit.objects.filter(
+            expense__paid_by=user,
+            is_settled=False
+        ).exclude(user=user).values(
+            'user__id', 'user__first_name', 'user__last_name', 'user__username'
+        ).annotate(total_amount=Sum('amount_owed'))
 
-    #     # 2. Borclarım: Başqalarının yaratdığı xərclərdə mənim payıma düşən ödənilməmiş hissələr
-    #     debts = ExpenseSplit.objects.filter(
-    #         user=user,
-    #         is_settled=False
-    #     ).exclude(expense__paid_by=user).values(
-    #         'expense__paid_by__first_name', 
-    #         'expense__paid_by__last_name', 
-    #         'expense__paid_by__username',
-    #         'expense__paid_by__id'
-    #     ).annotate(
-    #         total_amount=Sum('amount_owed')
-    #     )
+        # 2. Borclarım: I owe others (They paid, I haven't settled)
+        debts_qs = ExpenseSplit.objects.filter(
+            user=user,
+            is_settled=False
+        ).exclude(expense__paid_by=user).values(
+            'expense__paid_by__id', 'expense__paid_by__first_name', 'expense__paid_by__last_name', 'expense__paid_by__username'
+        ).annotate(total_amount=Sum('amount_owed'))
 
-    #     context['receivables'] = receivables
-    #     context['debts'] = debts
-    #     context['total_receivable'] = receivables.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
-    #     context['total_debt'] = debts.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
+        # Netting logic
+        user_balances = {}
+
+        # Process receivables (positive balance)
+        for r in receivables_qs:
+            uid = r['user__id']
+            user_balances[uid] = {
+                'id': uid,
+                'first_name': r['user__first_name'],
+                'last_name': r['user__last_name'],
+                'username': r['user__username'],
+                'amount': r['total_amount']
+            }
+
+        # Substract debts (negative balance)
+        for d in debts_qs:
+            uid = d['expense__paid_by__id']
+            if uid in user_balances:
+                user_balances[uid]['amount'] -= d['total_amount']
+            else:
+                user_balances[uid] = {
+                    'id': uid,
+                    'first_name': d['expense__paid_by__first_name'],
+                    'last_name': d['expense__paid_by__last_name'],
+                    'username': d['expense__paid_by__username'],
+                    'amount': -d['total_amount']
+                }
+
+        final_receivables = []
+        final_debts = []
+        total_receivable = Decimal('0')
+        total_debt = Decimal('0')
+
+        for uid, data in user_balances.items():
+            if data['amount'] > 0:
+                final_receivables.append({
+                    'user__id': data['id'],
+                    'user__first_name': data['first_name'],
+                    'user__last_name': data['last_name'],
+                    'user__username': data['username'],
+                    'total_amount': data['amount']
+                })
+                total_receivable += data['amount']
+            elif data['amount'] < 0:
+                final_debts.append({
+                    'expense__paid_by__id': data['id'],
+                    'expense__paid_by__first_name': data['first_name'],
+                    'expense__paid_by__last_name': data['last_name'],
+                    'expense__paid_by__username': data['username'],
+                    'total_amount': abs(data['amount'])
+                })
+                total_debt += abs(data['amount'])
+
+        context['receivables'] = final_receivables
+        context['debts'] = final_debts
+        context['total_receivable'] = total_receivable
+        context['total_debt'] = total_debt
         
-    #     return context
+        # Unified balances list for the "merged" section in balance.html
+        balances_list = []
+        for uid, data in user_balances.items():
+            if data['amount'] != 0:
+                balances_list.append({
+                    'id': uid,
+                    'first_name': data['first_name'],
+                    'last_name': data['last_name'],
+                    'username': data['username'],
+                    'amount': data['amount'],
+                    'abs_amount': abs(data['amount']),
+                })
+        # Sort by absolute amount descending
+        balances_list.sort(key=lambda x: x['abs_amount'], reverse=True)
+        context['balances'] = balances_list
+
+        # Additional context for modal and navbar
+        context['all_users'] = User.objects.exclude(id=user.id).exclude(is_superuser=True)
+        context['has_new_notifications'] = ExpenseSplit.objects.filter(
+            expense__paid_by=user, 
+            waiting_for_settlement=True,
+            is_viewed_by_creator=False
+        ).exists()
+        
+        return context
     
 
 @csrf_exempt
