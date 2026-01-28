@@ -1,7 +1,7 @@
 from .base import *
 import os
 
-DEBUG = True
+DEBUG = False
 
 # PythonAnywhere domenini əlavə edirik
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "xercler.pythonanywhere.com").split(",")
