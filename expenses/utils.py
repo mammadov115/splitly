@@ -23,8 +23,10 @@ def initialize_firebase():
                 # log("Firebase lazy initialization successful.")
             else:
                 # log("Firebase certificate file not found.")
+                print("Firebase certificate file not found.")
         except Exception as e:
             # log(f"Firebase initialization error: {e}")
+            print(f"Firebase initialization error: {e}")
 
 
 
