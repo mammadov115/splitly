@@ -13,6 +13,7 @@ class Expense(models.Model):
     
 
     is_split_equally = models.BooleanField(default=True) 
+    is_payment = models.BooleanField(default=False) 
 
     def __str__(self):
         return f"{self.title} - {self.amount} AZN"

@@ -8,7 +8,7 @@ from fcm_django.models import FCMDevice
 
 def log(message):
     log_path = os.path.join(settings.BASE_DIR, 'my_debug.txt')
-    with open(log_path, "a") as f:
+    with open(log_path, "a", encoding="utf-8") as f:
         timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         f.write(f"[{timestamp}] {message}\n")
 

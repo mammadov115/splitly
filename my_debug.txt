@@ -10,3 +10,16 @@
 [2026-01-22 18:23:37] Firebase UGURLU: guhakopem ucun gonderildi.
 [2026-01-22 18:24:40] Preparing to send notifications for expense 'Sapiente blanditiis ' to users: ['Mehman', 'Murad', 'Sahin', 'guhakopem', 'mehmanmehman182@gmail.com']
 [2026-01-22 18:24:40] Firebase UGURLU: guhakopem ucun gonderildi.
+[2026-01-28 20:56:39] Preparing to send notifications for expense 'Borcun qaytarılması 💸' to users: ['guhakopem']
+[2026-01-28 20:56:39] Firebase lazy initialization successful.
+[2026-01-28 20:56:43] Firebase UGURLU: guhakopem ucun gonderildi.
+[2026-01-28 20:56:59] Preparing to send notifications for expense 'Borcun qaytarılması 💸' to users: ['guhakopem']
+[2026-01-28 20:56:59] Firebase UGURLU: guhakopem ucun gonderildi.
+[2026-01-28 21:04:21] Preparing to send notifications for expense 'Borcun qaytarılması 💸' to users: ['guhakopem']
+[2026-01-28 21:04:21] Firebase lazy initialization successful.
+[2026-01-28 21:04:24] Firebase UGURLU: guhakopem ucun gonderildi.
+[2026-01-28 21:09:23] Preparing to send notifications for expense 'Borcun qaytarılması 💸' to users: ['mehmanmehman182@gmail.com']
+[2026-01-28 21:09:37] Preparing to send notifications for expense 'Borcun qaytarılması 💸' to users: ['guhakopem']
+[2026-01-28 21:09:38] Firebase UGURLU: guhakopem ucun gonderildi.
+[2026-01-28 21:19:58] Preparing to send notifications for expense 'Borcun qaytarılması 💸' to users: ['Mehman']
+[2026-01-28 21:19:58] Firebase lazy initialization successful.

@@ -7,8 +7,8 @@
         <div class="display-mode transition-all duration-300">
             <div class="flex justify-between items-start mb-4">
                 <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center text-orange-600">
-                        <i class="fa-solid fa-cart-shopping"></i>
+                    <div class="w-12 h-12 {% if expense.is_payment %}bg-emerald-100 text-emerald-600{% else %}bg-orange-100 text-orange-600{% endif %} rounded-2xl flex items-center justify-center">
+                        <i class="fa-solid {% if expense.is_payment %}fa-hand-holding-dollar{% else %}fa-cart-shopping{% endif %}"></i>
                     </div>
                     <div>
                         <h3 class="font-bold text-slate-800 leading-tight expense-title-text">{{ expense.title }}</h3>
@@ -26,10 +26,17 @@
                 
                 <div class="text-right">
                     <span class="text-lg font-bold text-slate-800 expense-amount-text">{{ expense.amount }} AZN</span>
-                    <p class="text-[10px] text-indigo-500 font-bold uppercase">Sən ödədin</p>
+                    <p class="text-[10px] {% if expense.is_payment %}text-emerald-500{% else %}text-indigo-500{% endif %} font-bold uppercase">
+                        {% if expense.is_payment %}
+                            {% for s in expense.other_splits %}{{ s.user.first_name }}{% endfor %}-a ödədin 💸
+                        {% else %}
+                            Sən ödədin
+                        {% endif %}
+                    </p>
                 </div>
             </div>
             
+            {% if not expense.is_payment %}
             <div class="splits-container space-y-3 bg-slate-50 rounded-2xl p-3">
                 <div class="flex justify-between items-center text-sm" data-user-id="{{ request.user.id }}">
                     <span class="text-slate-600 flex items-center gap-2">        
@@ -60,6 +67,7 @@
                     </div>
                 {% endfor %}
             </div>
+            {% endif %}
         </div>
 
         <!-- Edit Mode (Hidden by default) -->

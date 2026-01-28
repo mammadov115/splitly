@@ -9,7 +9,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.http import JsonResponse, HttpResponse
 from django.contrib.auth.decorators import login_required
-from django.db.models import OuterRef, Subquery, Sum
+from django.db.models import Q, OuterRef, Subquery, Sum
 import json
 from decimal import Decimal
 from django.db import transaction
@@ -34,19 +34,31 @@ class HomeView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
             user = self.request.user
+            view_type = self.request.GET.get('view', 'expenses')
+            
             # 1. Cari user-in həmin xərcdəki split-ini tapmaq üçün Subquery
             user_shares = ExpenseSplit.objects.filter(
                 expense=OuterRef('pk'), 
                 user=user
             )
 
-            # 2. Əsas sorğu (Bunu get_queryset-ə köçürdük ki, ListView pagination-ı idarə edə bilsin)
-            queryset = Expense.objects.select_related('paid_by').prefetch_related('splits__user').annotate(
+            # 2. Əsas sorğu
+            queryset = Expense.objects.filter(
+                Q(paid_by=user) | Q(splits__user=user)
+            ).select_related('paid_by').prefetch_related('splits__user').annotate(
                 my_split_id=Subquery(user_shares.values('pk')[:1]),
                 my_share=Subquery(user_shares.values('amount_owed')[:1]),
                 is_settled=Subquery(user_shares.values('is_settled')[:1]),
                 waiting_for_settlement=Subquery(user_shares.values('waiting_for_settlement')[:1])
-            ).order_by('-date')
+            ).distinct()
+
+            # Filter by type
+            if view_type == 'payments':
+                queryset = queryset.filter(is_payment=True)
+            else:
+                queryset = queryset.filter(is_payment=False)
+
+            queryset = queryset.order_by('-date')
             
             # Template seçimi üçün loop
             for e in queryset:
@@ -60,6 +72,7 @@ class HomeView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
+        context['current_view'] = self.request.GET.get('view', 'expenses')
 
         context['form'] = ExpenseForm()
         # Adding splits to context for display purposes
@@ -151,6 +164,7 @@ def add_expense_ajax(request):
         title = data.get('title')
         amount = Decimal(str(data.get('amount')))
         user_ids = data.get('split_with', []) # Seçilmiş user ID-ləri siyahısı
+        is_payment = data.get('is_payment', False)
 
         if not title or amount <= 0:
             return JsonResponse({'success': False, 'error': 'Məlumatlar tam deyil'}, status=400)
@@ -159,7 +173,8 @@ def add_expense_ajax(request):
         expense = Expense.objects.create(
             title=title,
             amount=amount,
-            paid_by=request.user
+            paid_by=request.user,
+            is_payment=is_payment
         )
 
         # 2. Xərci bölmək (Əgər heç kim seçilməyibsə, yalnız özünə yazır)
@@ -167,16 +182,34 @@ def add_expense_ajax(request):
             user_ids = [request.user.id]
         
         users_to_split = User.objects.filter(id__in=user_ids)
-        expense.split_expense(users_to_split)
+        
+        # Split logic tailored for payments
+        if is_payment:
+            split_amount = amount / len(users_to_split)
+            for user in users_to_split:
+                ExpenseSplit.objects.create(
+                    expense=expense,
+                    user=user,
+                    amount_owed=split_amount,
+                    is_settled=False,
+                    waiting_for_settlement=True
+                )
+        else:
+            expense.split_expense(users_to_split)
         
 
         # --- BİLDİRİŞ GÖNDƏRMƏ HİSSƏSİ ---
         notification_title = "Yeni Xərc!"
-        notification_body = f"{request.user.username} '{title}' aldı. Sənə bu xərcdən {expense.my_split} düşür."
         log(f"Preparing to send notifications for expense '{title}' to users: {[user.username for user in users_to_split]}")
+        
         for user_to_notify in users_to_split:
             # Özümüzə bildiriş göndərmirik
             if user_to_notify != request.user:
+                # Hər istifadəçi üçün öz payını tapırıq
+                user_split = expense.splits.filter(user=user_to_notify).first()
+                split_amount_str = f"{user_split.amount_owed} ₼" if user_split else "0 ₼"
+                notification_body = f"{request.user.username} '{title}' qeyd etdi. Sənin payın: {split_amount_str}"
+
                 # 1. Firebase Live Push Notification
                 try:
                     send_live_notification(
@@ -187,13 +220,11 @@ def add_expense_ajax(request):
                 except Exception as fcm_error:
                     log(f"FCM Error for {user_to_notify.username}: {fcm_error}")
 
-
-        
-        # 3. Yeni sttausu göndərmək
+        # 3. Yeni statusu göndərmək
         return HttpResponse(status=200)
 
     except Exception as e:
-        print("Error:", e)
+        log(f"AJAX Error in add_expense_ajax: {str(e)}")
         return HttpResponse(status=400)
 
 @require_POST
@@ -214,11 +245,12 @@ class NotificationListView(LoginRequiredMixin, ListView):
     context_object_name = 'incoming_approvals'
 
     def get_queryset(self):
-        # Yalnız cari istifadəçinin yaratdığı xərclər üzrə təsdiq gözləyən splitlər
+        # Yalnız cari istifadəçinin yaratdığı xərclər üzrə digərlərinin təsdiq gözləyən splitlər (Pay Now flow)
+        # VƏ Cari istifadəçiyə başqası tərəfindən edilən ödənişlər (Payment flow)
         qs = ExpenseSplit.objects.filter(
-            expense__paid_by=self.request.user,
-            waiting_for_settlement=True
-        ).exclude(user=self.request.user).select_related('expense', 'user').order_by('-id')
+            Q(expense__paid_by=self.request.user, expense__is_payment=False, waiting_for_settlement=True) |
+            Q(user=self.request.user, expense__is_payment=True, waiting_for_settlement=True)
+        ).exclude(user=self.request.user, expense__is_payment=False).select_related('expense', 'user', 'expense__paid_by').order_by('-id')
 
         qs.filter(is_viewed_by_creator=False).update(is_viewed_by_creator=True)
 
@@ -235,25 +267,33 @@ class NotificationListView(LoginRequiredMixin, ListView):
 @require_POST
 @csrf_exempt
 def approve_split(request, split_id):
-        # Təhlükəsizlik: Yalnız xərci yaradan şəxs bu split-i idarə edə bilər
+        # Təhlükəsizlik: Yalnız xərci yaradan şəxs VƏ YA ödənişi qəbul edən şəxs bu split-i idarə edə bilər
         split = get_object_or_404(
             ExpenseSplit, 
-            id=split_id, 
-            expense__paid_by=request.user,
+            Q(id=split_id, expense__paid_by=request.user) | Q(id=split_id, user=request.user, expense__is_payment=True),
             waiting_for_settlement=True
         )
         
-        action = request.POST.get  ('action')
+        action = request.POST.get('action')
 
         if action == 'approve':
-            split.is_settled = True
-            split.waiting_for_settlement = False
+            # Ödəniş və ya xərc spliti təsdiqlənir
+            if split.expense.is_payment:
+                # Ödəniş qəbul olundusa, artıq balansda rəsmən nəzərə alınır
+                # is_settled-i False saxlayırıq ki, netting logic-də iştirak etsin
+                split.waiting_for_settlement = False
+            else:
+                # Köhnə "Pay Now" logic-i üçün
+                split.is_settled = True
+                split.waiting_for_settlement = False
+            
             split.save()
-            return JsonResponse({'status': 'success', 'message': 'Ödəniş təsdiqləndi'})
+            return JsonResponse({'status': 'success', 'message': 'Əməliyyat təsdiqləndi'})
         
         elif action == 'reject':
-            split.is_settled = False
             split.waiting_for_settlement = False
+            # Əgər ödənişdirsə, bəlkə də silmək daha məntiqlidir? 
+            # Amma hələlik sadəcə waiting statusundan çıxarırıq.
             split.save()
             return JsonResponse({'status': 'success', 'message': 'İmtina edildi'})
 
@@ -270,7 +310,8 @@ class BalanceView(LoginRequiredMixin, TemplateView):
         # 1. Alacaqlar: Others owe me (I paid, they haven't settled)
         receivables_qs = ExpenseSplit.objects.filter(
             expense__paid_by=user,
-            is_settled=False
+            is_settled=False,
+            waiting_for_settlement=False
         ).exclude(user=user).values(
             'user__id', 'user__first_name', 'user__last_name', 'user__username'
         ).annotate(total_amount=Sum('amount_owed'))
@@ -278,7 +319,8 @@ class BalanceView(LoginRequiredMixin, TemplateView):
         # 2. Borclarım: I owe others (They paid, I haven't settled)
         debts_qs = ExpenseSplit.objects.filter(
             user=user,
-            is_settled=False
+            is_settled=False,
+            waiting_for_settlement=False
         ).exclude(expense__paid_by=user).values(
             'expense__paid_by__id', 'expense__paid_by__first_name', 'expense__paid_by__last_name', 'expense__paid_by__username'
         ).annotate(total_amount=Sum('amount_owed'))
