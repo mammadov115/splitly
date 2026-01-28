@@ -20,11 +20,11 @@ def initialize_firebase():
             if cert_path and os.path.exists(cert_path):
                 cred = credentials.Certificate(cert_path)
                 firebase_admin.initialize_app(cred)
-                log("Firebase lazy initialization successful.")
+                # log("Firebase lazy initialization successful.")
             else:
-                log("Firebase certificate file not found.")
+                # log("Firebase certificate file not found.")
         except Exception as e:
-            log(f"Firebase initialization error: {e}")
+            # log(f"Firebase initialization error: {e}")
 
 
 
@@ -45,6 +45,6 @@ def send_live_notification(user, title, body):
             )
 
             devices.send_message(message)
-            log(f"Firebase UGURLU: {user.username} ucun gonderildi.")
+            # log(f"Firebase UGURLU: {user.username} ucun gonderildi.")
         except Exception as e:
-            log(f"Firebase Xetasi: {str(e)}")
+            # log(f"Firebase Xetasi: {str(e)}")
