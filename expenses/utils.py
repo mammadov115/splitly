@@ -50,3 +50,4 @@ def send_live_notification(user, title, body):
             # log(f"Firebase UGURLU: {user.username} ucun gonderildi.")
         except Exception as e:
             # log(f"Firebase Xetasi: {str(e)}")
+            print(f"Firebase Xetasi: {str(e)}")
